@@ -2,7 +2,9 @@
   import { user, updateConfig } from './lib/stores/UserStore.js';
   import { open } from '@tauri-apps/api/dialog';
   import { documentDir } from '@tauri-apps/api/path';
-  import { createNetwork } from './lib/stores/utils/utils.network.js';
+  import { createNetwork } from './lib/utils/utils.network.js';
+  import Sidebar from './lib/components/sidebar/Sidebar.svelte';
+    import Editor from './lib/components/editor/Editor.svelte';
 
   let requestNetworkLocation = $user.config.network_config.location === "";
   let dir;
@@ -43,7 +45,8 @@
     </div>
   {:else}
     <div id="ui-shell">
-
+      <Sidebar />
+      <Editor />
     </div>
   {/if}
 </main>
