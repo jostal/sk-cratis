@@ -51,5 +51,8 @@
   {/if}
 </main>
 
-<style>
+<style lang="scss">
+  #ui-shell {
+    position: relative;
+  }
 </style>

@@ -1,5 +1,5 @@
 <script>
-  import { editor } from "src/lib/stores/EditorStore";
+  import { editor } from "../../stores/EditorStore";
 
 </script>
 

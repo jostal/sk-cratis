@@ -1,16 +1,17 @@
 <script>
   import { user } from "../../stores/UserStore.js";
-  import { editor } from "../../stores/EditorStore.js";
+  import { editor, openNode } from "../../stores/EditorStore.js";
   import { createNode } from "../../utils/utils.network";
   let showNodeDialog = false;
 
   let handleCreateNode = (data) => {
     let formFields = data.elements;
-    createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes', formFields.nodeName.value);
+    createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', formFields.nodeName.value);
     showNodeDialog = false;
     $editor.activeNode = formFields.nodeName.value + '.md'
   }
 
+  $: $editor, openNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + $editor.activeNode, $editor.activeNode)
 </script>
 
 <section id="sidebar">
@@ -25,3 +26,14 @@
     </div>
   {/if}
 </section>
+
+<style lang="scss">
+  #sidebar {
+    position: sticky;
+    left: 0;
+    background-color: var(--sidebar-color);
+    height: 100vh;
+    max-width: 250px;
+    width: 20%;
+  }
+</style>
