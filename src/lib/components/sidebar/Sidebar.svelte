@@ -9,10 +9,10 @@
     createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', formFields.nodeName.value);
     showNodeDialog = false;
     $editor.activeNode = formFields.nodeName.value + '.md'
+    $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + formFields.nodeName.value + '.md'
   }
 
-  $: $editor, openNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + $editor.activeNode, $editor.activeNode)
-</script>
+  </script>
 
 <section id="sidebar">
   <button on:click={() => showNodeDialog = true}>Create Node</button>
@@ -33,7 +33,6 @@
     left: 0;
     background-color: var(--sidebar-color);
     height: 100vh;
-    max-width: 250px;
-    width: 20%;
+    width: 100%;
   }
 </style>

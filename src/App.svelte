@@ -45,8 +45,12 @@
     </div>
   {:else}
     <div id="ui-shell">
-      <Sidebar />
-      <Editor />
+      <div id="sidebar-container">
+        <Sidebar />
+      </div>
+      <div id="editor-container">
+        <Editor />
+      </div>
     </div>
   {/if}
 </main>
@@ -54,5 +58,19 @@
 <style lang="scss">
   #ui-shell {
     position: relative;
+    display: grid;
+    grid-template-areas: 
+      "sidebar editor";
+    grid-template-columns: minmax(100px, 250px) calc(100% - 250px);
+
+    #sidebar-container {
+      grid-area: sidebar;
+    }
+
+    #editor-container {
+      grid-area: editor;
+      width: 100%;
+      justify-self: start;
+    }
   }
 </style>

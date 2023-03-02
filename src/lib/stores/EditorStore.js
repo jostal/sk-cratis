@@ -1,17 +1,19 @@
 import { writable } from 'svelte/store'
 import { invoke } from '@tauri-apps/api/tauri';
 
+const editor = writable({
+  activeNode: "",
+  nodePath: ""
+});
+
 let openNode = async (nodePath, nodeName) => {
   let nodeStr;
   if (nodeName !== "") {
-    console.log("AAA")
     nodeStr = await invoke('open_node', { nodePath })  
   }
-  console.log(nodeStr)
+  return {
+    content: nodeStr
+  }
 }
-
-const editor = writable({
-  activeNode: ""
-});
 
 export { editor, openNode }
