@@ -1,17 +1,24 @@
 <script>
   import { editor, openNode } from "../../stores/EditorStore";
   let content;
-  console.log($editor)
+  let lines = []
 
   $: $editor, getContent()
 
   let getContent = async () => {
-   content = await openNode($editor.nodePath, $editor.activeNode).then(res => res.content)
+    content = await openNode($editor.nodePath, $editor.activeNode).then(res => res.content)
+    if (content)
+      lines = content.split(/\r?\n/)
   }
 </script>
 
 <section id="editor">
-  {content} 
+  <h1>
+    <input value={$editor.activeNode} />
+  </h1>
+  {#each lines as line}
+    <input value={line} />
+  {/each}
 </section>
 
 <style lang="scss">

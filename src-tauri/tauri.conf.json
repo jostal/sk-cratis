@@ -36,10 +36,13 @@
         "removeFile": true,
         "renameFile": true,
         "exists": true,
-        "scope": ["$APPCONFIG/*", "$APPCONFIG/config/*", "$RESOURCE/*"]
+        "scope": ["$APPCONFIG/*", "$APPCONFIG/config/*", "$RESOURCE/templates/*"]
       }
     },
     "bundle": {
+      "resources": [
+        "templates/*"
+      ],
       "active": true,
       "icon": [
         "icons/32x32.png",
