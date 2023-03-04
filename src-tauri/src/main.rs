@@ -7,7 +7,7 @@ use directories::ProjectDirs;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![create_network])
+        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -25,4 +25,17 @@ fn create_network(location: String, name: String) {
     fs::create_dir(cratis_dir).expect("Could not create network directory");
     fs::create_dir(nodes_dir).expect("Could not create nodes directory");
     fs::create_dir(journal_dir).expect("Could not create journal directory");
+}
+
+#[tauri::command]
+fn create_node(location: String, name: String) {
+    let node_path = format!("{location}/{name}.md").to_string();
+    if !Path::new(&node_path).exists() {
+        let node_file = File::create(node_path).expect("Could not create node");
+    }
+}
+
+#[tauri::command]
+fn open_node(nodePath: String) -> String {
+    fs::read_to_string(nodePath).expect("Could not open node")
 }

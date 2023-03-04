@@ -4,4 +4,8 @@ async function createNetwork(location, name) {
   await invoke('create_network', { location, name })
 }
 
-export { createNetwork }
+async function createNode(location, name) {
+  await invoke('create_node', { location, name })
+}
+
+export { createNetwork, createNode }
