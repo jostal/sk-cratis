@@ -8,7 +8,7 @@
     let formFields = data.elements;
     createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', formFields.nodeName.value);
     showNodeDialog = false;
-    $editor.activeNode = formFields.nodeName.value + '.md'
+    $editor.activeNode = formFields.nodeName.value
     $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + formFields.nodeName.value + '.md'
   }
 
