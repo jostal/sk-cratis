@@ -4,7 +4,7 @@
   let content;
   let lines = [""]
 
-  $: $editor, getContent()
+  $: $editor.activeNode, getContent()
 
   let getContent = async () => {
     content = await openNode($editor.nodePath, $editor.activeNode).then(res => res.content)
@@ -24,5 +24,6 @@
     padding: 1em;
     background-color: var(--sidebar-color);
     margin: 20px 10% 20px 10%;
+    height: calc(100% - 5em);
  }
 </style>

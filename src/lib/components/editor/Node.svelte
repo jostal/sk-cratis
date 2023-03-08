@@ -1,18 +1,23 @@
 <script>
   import { tick } from "svelte";
   import Fragment from "./Fragment.svelte";
-
+  import { editor } from "../../stores/EditorStore";
+  import { parseContent } from "../../utils/utils.editor";
   export let lines;
   let fragments = [];
 
   $: lines, lineToFragment()
 
-  let lineToFragment = () => {
+  let lineToFragment = async () => {
     fragments = []
-    lines.forEach((line, i) => {
+
+    await lines.forEach(async (line, i) => {
+      let parsedContent = await parseContent(line)
       fragments.push({
         key: i,
-        content: line
+        level: parsedContent.level,
+        content: parsedContent.content,
+        html: parsedContent.html
       })
     fragments = fragments
     })
@@ -42,16 +47,19 @@
   }
 
   let handleFocusFragment = (key) => {
-    document.getElementById(`frag-${key}`).lastChild.focus()
+    $editor.activeFragment = key
   }
 </script>
 
 <section id="node">
+  <h1>{$editor.activeNode}</h1>
   {#each fragments as fragment}
     <div key={fragment.key}>
       <Fragment 
         key={fragment.key} 
+        level={fragment.level}
         content={fragment.content} 
+        html={fragment.html}
         handleNewFragment={handleNewFragment}
         handleDeleteFragment={handleDeleteFragment}
         handleMergeFragments={handleMergeFragments}

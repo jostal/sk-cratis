@@ -1,6 +1,9 @@
 <script>
+  import { editor } from "../../stores/EditorStore";
   export let key
+  export let level
   export let content
+  export let html
   export let handleNewFragment
   export let handleDeleteFragment
   export let handleMergeFragments
@@ -36,21 +39,47 @@
 </script>
 
 <div id="frag-{key}" class="fragment">
-  <input 
-    value={content} 
-    on:keydown={handleKeydown}
-    bind:this={el} 
-  />
+  <div class="handle" style={`margin-left:calc(1em*${level})`}>•</div>
+  {#if $editor.activeFragment === key}
+    <div 
+      class="content active"
+      autofocus
+      contenteditable
+    >
+      {content}
+    </div>
+  {:else}
+    <div
+      class="content"
+      contenteditable
+      on:focus={() => $editor.activeFragment = key}
+    >
+      {@html html} 
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
   .fragment {
-    input {
-      padding: 0.3em;
-      width: 100%;
-      background-color: var(--sidebar-color);
-      border: none;
-      color: inherit;
+    display: inline-grid;
+    grid-template-areas: "handle content";
+
+    .handle {
+      grid-area: handle;
+      align-self: center;
+      padding: 0.1em;
+      margin-right: 0.5em;
+    }
+
+    .content {
+      grid-area: content;
+      display: inline;
+    }
+  }
+  :global {
+    .content > p {
+      display: inline;
+      margin: 0;
     }
   }
 </style>
