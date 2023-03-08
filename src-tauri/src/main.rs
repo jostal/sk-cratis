@@ -2,12 +2,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{fs::{File, self}, path::Path, env::current_dir, io::{ErrorKind, Write}};
-
+use comrak::{markdown_to_html, ComrakOptions};
 use directories::ProjectDirs;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node])
+        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -39,3 +39,8 @@ fn create_node(location: String, name: String) {
 fn open_node(nodePath: String) -> String {
     fs::read_to_string(nodePath).expect("Could not open node")
 }
+
+#[tauri::command]
+fn parse_md(content: String) -> String {
+    markdown_to_html(&content, &ComrakOptions::default())
+} 

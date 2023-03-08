@@ -18,6 +18,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 directories = "4.0.1"
 toml = "0.5.9"
+comrak = "0.15"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

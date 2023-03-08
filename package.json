@@ -12,6 +12,7 @@
   "dependencies": {
     "@tauri-apps/api": "^1.2.0",
     "json2toml": "^4.0.1",
+    "showdown": "^2.1.0",
     "toml": "^3.0.0"
   },
   "devDependencies": {

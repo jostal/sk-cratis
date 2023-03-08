@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/tauri';
 
 const editor = writable({
   activeNode: "",
+  activeFragment: 0,
   nodePath: ""
 });
 
