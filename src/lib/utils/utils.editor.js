@@ -14,4 +14,4 @@ async function parseContent(line) {
   }
 }
 
-export { parseContent }
+export { parseContent, convertMarkdown }
