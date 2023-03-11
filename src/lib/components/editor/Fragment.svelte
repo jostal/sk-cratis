@@ -12,7 +12,8 @@
   let fragContent
   let actionKeys = [
     "ArrowUp",
-    "ArrowDown"
+    "ArrowDown",
+    "Tab"
   ]
 
   let getFragContent = async() => {
@@ -107,6 +108,17 @@
       fragments = fragments
       await tick()
       setCaretPos(fragments[key+1].content.length)
+    }
+
+    if (e.key === "Tab") {
+      if (!e.shiftKey) {
+        if (fragments[key - 1].level >= fragments[key].level)
+          fragments[key].level++
+      } else {
+        if (level > 0)
+          fragments[key].level--
+      }
+      fragments = fragments
     }
   }
 

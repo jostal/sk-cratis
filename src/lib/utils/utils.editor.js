@@ -5,7 +5,11 @@ async function convertMarkdown(content) {
 }
 
 async function parseContent(line) {
-  let level = line.split('-')[0].length/4;
+  let splitArr = line.split('-')
+  let level = 0
+  if (splitArr.length > 1) {
+    level = splitArr[0].length/4
+  }
   let html = await convertMarkdown(line.substring(line.indexOf("-") + 2, line.length))
   return {
     level: level,
