@@ -7,7 +7,9 @@
   export let content
   export let active
   export let fragments
-  let el
+  export let dragging
+  let hoverHandle
+  let dragSrcEl
 
   let fragContent
   let actionKeys = [
@@ -186,37 +188,115 @@
     }
   }
 
+  let handleDragStart = (e) => {
+    // save source element 
+    dragSrcEl = e.target
+    e.dataTransfer.setData('text/plain', e.target.getAttribute('key'))
+    dragging = true
+  }
+  
+  let handleDragEnter = (e) => {
+  }
+
+  let handleDragEnd = (e) => {
+    dragging = false
+  }
+
+  let handleDragOver = (e) => {
+    return false
+  }
+
+  let handleDrop = (e) => {
+    // clone drop fragment and move down 1
+    let targetKey = parseInt(e.currentTarget.getAttribute('key'))
+    let cloneFrag = {
+      key: targetKey + 1,
+      level: fragments[targetKey].level,
+      content: fragments[targetKey].content,
+      active: false 
+    }
+    fragments.splice(targetKey + 1, 0, cloneFrag)
+    let i = targetKey + 2
+    for (i; i < fragments.length; i++) {
+      fragments[i].key++
+    }
+    // replace drop fragment with drag fragment
+    let oldKey = parseInt(e.dataTransfer.getData('text'))
+    let oldFrag = {
+      key: targetKey,
+      level: fragments[targetKey+1].level,
+      content: fragments[oldKey+1].content,
+      active: true
+    }
+    fragments[targetKey] = oldFrag
+    // delete drag fragment
+    fragments.splice(oldKey+1, 1)
+    i = oldKey+1
+    for (i; i < fragments.length; i++) {
+      fragments[i].key--
+    }
+
+    console.log(oldFrag)
+    fragments = fragments
+  }
+
 </script>
 
-<div id="frag-{key}" class="fragment">
-  <div class="handle" style={`margin-left:calc(1em*${level})`}>•</div>
-  <div
-    class={`content ${active ? 'active' : ''}`}
-    on:click={(e) => handleClick("focus", e)}
-    on:blur={(e) => handleClick("blur", e)}
-    on:input={handleInput}
-    on:keydown={handleKeydown}
-    contenteditable
+<div 
+  id="frag-{key}" 
+  key={key}
+  class={`fragment ${dragging ? 'dragging' : ''}`}
+  on:dragover|preventDefault={handleDragOver}
+  on:dragenter|preventDefault={handleDragEnter}
+  on:drop={handleDrop}
+>
+  <div 
+    class={`frag-drag ${hoverHandle ? 'draggable' : ''}`}
+    key={key}
+    on:dragstart={handleDragStart}
+    on:dragend={handleDragEnd}
+    draggable="true"
   >
-    {@html fragContent}
-  </div> 
+    <div 
+      class="handle" 
+      style={`margin-left:calc(1em*${level})`}
+      on:mouseenter={() => hoverHandle = true}
+      on:mouseleave={() => hoverHandle = false}
+    >•</div>
+    <div
+      class={`content ${active ? 'active' : ''}`}
+      on:click={(e) => handleClick("focus", e)}
+      on:blur={(e) => handleClick("blur", e)}
+      on:input={handleInput}
+      on:keydown={handleKeydown}
+      contenteditable
+    >
+      {@html fragContent}
+    </div> 
+  </div>
+ 
 </div>
 
 <style lang="scss">
-  .fragment {
+  .frag-drag {
+    pointer-events: none;
     display: inline-grid;
     grid-template-areas: "handle content";
+    grid-template-columns: 1em auto;
+    width: 100%;
 
     .handle {
       grid-area: handle;
       align-self: center;
       padding: 0.1em;
       margin-right: 0.5em;
+      pointer-events: auto;
     }
 
     .content {
       grid-area: content;
       display: inline;
+      pointer-events: auto;
     }
   }
   :global {
@@ -224,5 +304,12 @@
       display: inline;
       margin: 0;
     }
+  }
+  .dragging {
+    
+  }
+
+  .draggable {
+    cursor: move;
   }
 </style>

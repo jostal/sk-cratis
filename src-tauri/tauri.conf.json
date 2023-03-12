@@ -66,7 +66,8 @@
         "resizable": true,
         "title": "sk-cratis",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "fileDropEnabled": false
       }
     ]
   }
