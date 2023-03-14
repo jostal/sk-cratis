@@ -5,6 +5,7 @@
   import { parseContent } from "../../utils/utils.editor.js"
   export let lines
   let fragments = []
+  let dragging = false
 
   $: lines, lineToFragment()
 
@@ -34,7 +35,16 @@
         content={fragment.content}
         active={fragment.active}
         bind:fragments={fragments}
+        bind:dragging={dragging}
       />
     </div>
   {/each}
 </section>
+
+<style lang="scss">
+  #node {
+    div {
+      pointer-events: none;
+    }
+  }
+</style>
