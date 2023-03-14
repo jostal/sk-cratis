@@ -1,6 +1,6 @@
 <script>
   import { editor } from "../../stores/EditorStore";
-  import { convertMarkdown } from '../../utils/utils.editor.js'
+  import { convertMarkdown, saveNode } from '../../utils/utils.editor.js'
   import { tick } from 'svelte'
   export let key
   export let level
@@ -24,6 +24,7 @@
   }
 
   $: fragments, getFragContent()
+  $: fragments, saveNode(fragments, $editor.nodePath)
 
   let handleKeydown = async (e) => {
     if (actionKeys.includes(e.key))

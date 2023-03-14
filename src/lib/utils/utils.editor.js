@@ -13,9 +13,20 @@ async function parseContent(line) {
   let html = await convertMarkdown(line.substring(line.indexOf("-") + 2, line.length))
   return {
     level: level,
-    content: line.substring(line.indexOf("-")+1, line.length),
+    content: line.substring(line.indexOf("-")+2, line.length),
     html: html
   }
 }
 
-export { parseContent, convertMarkdown }
+async function saveNode(fragments, nodePath) {
+  //write fragments to file with bullet at appropriate level
+  let nodeStr = ""
+  fragments.forEach(frag => {
+    if (frag.content !== "")
+      nodeStr += "    ".repeat(frag.level) + "- " + frag.content + "\n"
+  })
+  
+  await invoke('save_node', { nodeStr, nodePath })
+}
+
+export { parseContent, convertMarkdown, saveNode }

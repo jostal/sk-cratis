@@ -1,13 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{fs::{File, self}, path::Path, env::current_dir, io::{ErrorKind, Write}};
+use std::{fs::{File, self, OpenOptions}, path::Path, env::current_dir, io::{ErrorKind, Write}};
 use comrak::{markdown_to_html, ComrakOptions};
 use directories::ProjectDirs;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md])
+        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -44,3 +44,11 @@ fn open_node(nodePath: String) -> String {
 fn parse_md(content: String) -> String {
     markdown_to_html(&content, &ComrakOptions::default())
 } 
+
+#[tauri::command]
+fn save_node(nodeStr: String, nodePath: String) {
+    if nodePath != "" {
+        let mut file = OpenOptions::new().write(true).open(nodePath).expect("Could not open file");
+        file.write_all(nodeStr.as_bytes()).expect("Could not write node");
+    }
+}    

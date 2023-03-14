@@ -2,14 +2,18 @@
   import { editor, openNode } from "../../stores/EditorStore";
   import Node from "./Node.svelte";
   let content;
-  let lines = [""]
+  let lines = []
 
   $: $editor.activeNode, getContent()
 
   let getContent = async () => {
+    lines = []
     content = await openNode($editor.nodePath, $editor.activeNode).then(res => res.content)
-    if (content)
+    if (content) {
       lines = content.split(/\r?\n/)
+    } else {
+      lines = [""]
+    }
     lines = lines
   }
 
