@@ -209,6 +209,7 @@
   let handleDrop = (e) => {
     // clone drop fragment and move down 1
     let targetKey = parseInt(e.currentTarget.getAttribute('key'))
+    let oldKey = parseInt(e.dataTransfer.getData('text'))
     let cloneFrag = {
       key: targetKey + 1,
       level: fragments[targetKey].level,
@@ -220,23 +221,36 @@
     for (i; i < fragments.length; i++) {
       fragments[i].key++
     }
-    // replace drop fragment with drag fragment
-    let oldKey = parseInt(e.dataTransfer.getData('text'))
-    let oldFrag = {
-      key: targetKey,
-      level: fragments[targetKey+1].level,
-      content: fragments[oldKey+1].content,
-      active: true
-    }
-    fragments[targetKey] = oldFrag
-    // delete drag fragment
-    fragments.splice(oldKey+1, 1)
-    i = oldKey+1
-    for (i; i < fragments.length; i++) {
-      fragments[i].key--
-    }
 
-    console.log(oldFrag)
+    if (targetKey < oldKey) {
+     // replace drop fragment with drag fragment
+      let oldFrag = {
+        key: targetKey,
+        level: fragments[targetKey+1].level,
+        content: fragments[oldKey+1].content,
+        active: true
+      }
+      fragments[targetKey] = oldFrag
+      // delete drag fragment
+      fragments.splice(oldKey+1, 1)
+      i = oldKey+1
+      for (i; i < fragments.length; i++) {
+        fragments[i].key--
+      }
+    } else {
+      let dragFrag = {
+        key: targetKey,
+        level: fragments[targetKey+1].level,
+        content: fragments[oldKey].content,
+        active: true 
+      }
+      fragments[targetKey] = dragFrag
+      fragments.splice(oldKey, 1)
+      i = oldKey
+      for (i; i < fragments.length; i++) {
+        fragments[i].key--
+      }
+    }
     fragments = fragments
   }
 
