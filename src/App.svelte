@@ -5,6 +5,7 @@
   import { createNetwork } from './lib/utils/utils.network.js';
   import Sidebar from './lib/components/sidebar/Sidebar.svelte';
     import Editor from './lib/components/editor/Editor.svelte';
+  import Navbar from './lib/components/nav/Navbar.svelte';
 
   let requestNetworkLocation = $user.config.network_config.location === "";
   let dir;
@@ -45,6 +46,9 @@
     </div>
   {:else}
     <div id="ui-shell">
+      <div id="nav">
+        <Navbar />
+      </div>
       <div id="sidebar-container">
         <Sidebar />
       </div>
@@ -60,8 +64,14 @@
     position: relative;
     display: grid;
     grid-template-areas: 
+      "nav nav"
       "sidebar editor";
     grid-template-columns: minmax(100px, 250px) calc(100% - 250px);
+
+    #nav {
+      grid-area: nav;
+      width: 100%;
+    }
 
     #sidebar-container {
       grid-area: sidebar;

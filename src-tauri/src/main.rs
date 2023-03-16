@@ -7,7 +7,7 @@ use directories::ProjectDirs;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node])
+        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node, search_nodes])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -52,3 +52,23 @@ fn save_node(nodeStr: String, nodePath: String) {
         file.write_all(nodeStr.as_bytes()).expect("Could not write node");
     }
 }    
+
+#[tauri::command]
+fn search_nodes(searchVal: String, cratisDir: String) -> Vec<String> {
+    let mut nodes = Vec::new();
+    let mut nodes_dir = cratisDir.clone();
+    nodes_dir.push_str("/nodes/");
+
+    let node_paths = fs::read_dir(nodes_dir).unwrap();
+
+    for path in node_paths {
+        // iterate through all nodes and add to nodes vec if matches
+        let mut node_name = path.unwrap().file_name().to_str().unwrap().to_string();
+        node_name.truncate(node_name.len() - 3);
+        
+        if node_name.contains(&searchVal) {
+            nodes.push(node_name);
+        }
+    }
+    nodes
+}
