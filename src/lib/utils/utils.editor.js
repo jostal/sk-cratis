@@ -29,4 +29,24 @@ async function saveNode(fragments, nodePath) {
   await invoke('save_node', { nodeStr, nodePath })
 }
 
-export { parseContent, convertMarkdown, saveNode }
+async function searchNodes(searchVal, cratisDir) {
+  let nodes = await invoke('search_nodes', { searchVal, cratisDir })
+  // sort matching nodes by closeness to search value and return top 10
+  let filteredNodes = nodes
+    .filter((item) => item.toLowerCase().includes(searchVal.toLowerCase()))
+    .sort((a, b) => {
+      let key = searchVal.toLowerCase()
+      let isGoodMatchA = a.toLowerCase().startsWith(key)
+      let isGoodMatchB = b.toLowerCase().startsWith(key)
+
+      if (isGoodMatchA ^ isGoodMatchB) {
+        return isGoodMatchA ? -1: 1 
+      }
+
+      return a.localeCompare(b)
+    })
+
+  return filteredNodes.slice(0, 9)
+}
+
+export { parseContent, convertMarkdown, saveNode, searchNodes }
