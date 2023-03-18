@@ -9,7 +9,6 @@
   export let fragments
   export let dragging
   let hoverHandle
-  let dragSrcEl
 
   let fragContent
   let actionKeys = [
@@ -18,9 +17,22 @@
     "Tab"
   ]
 
+  let pairKeys = [
+    { key: "[", pair: "]" },
+    { key: "(", pair: ")" },
+    { key: "{", pair: "}"}
+  ]
+
   let getFragContent = async() => {
     fragContent = active ? content : await convertMarkdown(content)
     document.getElementsByClassName("active")[0]?.focus()
+  }
+
+  let handlePairing = async (keyPress, e) => {
+    let caretPos = getCaretPos(document.getElementsByClassName('active')[0])
+    fragments[key].content = fragContent.substring(0, caretPos.position) + keyPress + pairKeys.find(p => p.key === keyPress).pair + fragContent.substring(caretPos.position)
+    await tick()
+    setCaretPos(caretPos.position + 1)
   }
 
   $: fragments, getFragContent()
@@ -30,6 +42,10 @@
     if (actionKeys.includes(e.key))
       e.preventDefault()
     
+    if (pairKeys.find(p => p.key === e.key)) {
+      e.preventDefault()
+      handlePairing(e.key, e)
+    }
     // handle action keys 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -268,13 +284,13 @@
   <div 
     class={`frag-drag ${hoverHandle ? 'draggable' : ''}`}
     key={key}
+    style={`margin-left:calc(1em*${level})`}
     on:dragstart={handleDragStart}
     on:dragend={handleDragEnd}
     draggable="true"
   >
     <div 
       class="handle" 
-      style={`margin-left:calc(1em*${level})`}
       on:mouseenter={() => hoverHandle = true}
       on:mouseleave={() => hoverHandle = false}
     >•</div>
