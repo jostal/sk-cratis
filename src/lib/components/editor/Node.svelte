@@ -10,35 +10,38 @@
   $: lines, lineToFragment()
 
   let lineToFragment = async () => {
-    fragments = []
+    fragments = new Array(lines.length)
 
-    await lines.forEach( async (line, i) => {
-      let parsedContent = await parseContent(line)
-      fragments.push({
+    for (let i = 0;i < lines.length; i++) {
+      let parsedContent = await parseContent(lines[i])
+      fragments[i] = {
         key: i,
         level: parsedContent.level,
         content: parsedContent.content,
         active: false
-      })
+      }
+      console.log(fragments)
       fragments = fragments
-    })
+    }
   }
 </script>
 
 <section id="node">
   <h1>{$editor.activeNode}</h1>
-  {#each fragments as fragment}
-    <div key={fragment.key}>
-      <Fragment 
-        key={fragment.key} 
-        level={fragment.level}
-        content={fragment.content}
-        active={fragment.active}
-        bind:fragments={fragments}
-        bind:dragging={dragging}
-      />
-    </div>
-  {/each}
+  {#if fragments[fragments.length - 1]}
+    {#each fragments as fragment}
+      <div key={fragment.key}>
+        <Fragment 
+          key={fragment.key} 
+          level={fragment.level}
+          content={fragment.content}
+          active={fragment.active}
+          bind:fragments={fragments}
+          bind:dragging={dragging}
+        />
+      </div>
+    {/each}
+  {/if}
 </section>
 
 <style lang="scss">
