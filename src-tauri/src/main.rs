@@ -4,6 +4,7 @@
 use std::{fs::{File, self, OpenOptions}, path::Path, env::current_dir, io::{ErrorKind, Write}};
 use comrak::{markdown_to_html, ComrakOptions};
 use directories::ProjectDirs;
+use regex::{Regex, Captures};
 
 fn main() {
     tauri::Builder::default()
@@ -42,7 +43,18 @@ fn open_node(nodePath: String) -> String {
 
 #[tauri::command]
 fn parse_md(content: String) -> String {
-    markdown_to_html(&content, &ComrakOptions::default())
+    let mut opts = ComrakOptions::default();
+    opts.extension.strikethrough = true;
+    opts.extension.table = true;
+    opts.extension.tasklist = true;
+    opts.parse.smart = true;
+    let mut parsed_md = markdown_to_html(&content, &opts);
+    let re = Regex::new(r"\[\[(.+?)\]\]").unwrap();
+    let res = re.replace_all(&parsed_md, |captures: &Captures| {
+        let link = captures.get(1).unwrap().as_str();
+        format!("<button key=\"{}\" class=\"nodeLink\">{}</button>", link, link)
+    });
+    res.to_string() 
 } 
 
 #[tauri::command]
