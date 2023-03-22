@@ -15,6 +15,7 @@
   let linkSearch = false
   let searchResults = []
   let activeNode = 0
+  let tagSearch
 
   let fragContent
   let actionKeys = [
@@ -39,18 +40,43 @@
     let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position
     if (fragments[key].content.substring(caretPos - 3, caretPos - 1) === "[[") {
       linkSearch = true 
-    } else {
-      // linkSearch = false
     }
 
+    if (extractTag(fragments[key].content)) {
+      tagSearch = extractTag(fragments[key].content)
+      handleSearchTags()
+    } else {
+      tagSearch = ""
+    }
+    
     if (linkSearch)
       handleSearchNodes()
+  }
+
+  let extractTag = (str) => {
+    let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position
+    let lastTagIndex = str.lastIndexOf('#', caretPos - 1)
+    if (lastTagIndex === -1) return null
+    let nextWhitespaceIndex = str.indexOf(' ', lastTagIndex)
+    if (nextWhitespaceIndex === -1) {
+      let tag = str.slice(lastTagIndex + 1)
+      return tag.includes('#') ? null : tag
+    }
+    if (nextWhitespaceIndex < caretPos) return null
+    let tag = str.slice(lastTagIndex + 1, nextWhitespaceIndex)
+    return tag.includes('#') ? null : tag
   }
 
   let handleOpenNode = (e) => {
     createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', e.target.attributes[0].nodeValue)
     $editor.activeNode = e.target.attributes[0].nodeValue
     $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + e.target.attributes[0].nodeValue + '.md'
+  }
+
+  let handleSearchTags = async () => { 
+    searchResults = await searchNodes(tagSearch, $user.config.network_config.location + '/' + $user.config.network_config.name)
+    if (searchResults[0] !== tagSearch)
+      searchResults.splice(0, 0, tagSearch)
   }
   
   let getSearchVal = (caretPos, content) => {
@@ -93,7 +119,7 @@
       handlePairing(e.key, e)
     }
     // handle action keys 
-    if (e.key === "Enter" && !e.shiftKey && !linkSearch) {
+    if (e.key === "Enter" && !e.shiftKey && !linkSearch && tagSearch === "") {
       e.preventDefault()
       let caretInfo = getCaretPos(document.getElementsByClassName('active')[0])
       if (caretInfo.position === caretInfo.length && caretInfo.length > 0) {
@@ -157,17 +183,18 @@
       }
       fragments = fragments
       await tick()
-      setCaretPos(prevContent.length + 1)
+      if (content === "" || caretPos.position === 0)
+        setCaretPos(prevContent.length + 1)
     }
 
-    if (e.key === "ArrowUp" && !linkSearch) {
+    if (e.key === "ArrowUp" && (!linkSearch && tagSearch === "")) {
       fragments[key-1].active = true
       fragments[key].active = false
       fragments = fragments 
       await tick()
       setCaretPos(fragments[key-1].content.length)
     }
-    if (e.key === "ArrowDown" && !linkSearch) {
+    if (e.key === "ArrowDown" && (!linkSearch && tagSearch === "")) {
       fragments[key+1].active = true
       fragments[key].active = false
       fragments = fragments
@@ -175,17 +202,17 @@
       setCaretPos(fragments[key+1].content.length)
     }
 
-    if (e.key === "Enter" && linkSearch) {
+    if (e.key === "Enter" && (linkSearch || tagSearch !== "")) {
       e.preventDefault()
       handleAutoComplete(searchResults[activeNode])
     }
 
-    if (e.key === "ArrowUp" && linkSearch) {
+    if (e.key === "ArrowUp" && (linkSearch || tagSearch !== "")) {
       if (activeNode > 0)
         activeNode--
     }
 
-    if (e.key === "ArrowDown" && linkSearch) {
+    if (e.key === "ArrowDown" && (linkSearch || tagSearch !== "")) {
       if (activeNode < searchResults.length - 1)
         activeNode++
     }
@@ -334,12 +361,23 @@
   
   let handleAutoComplete = async (node) => {
     let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position 
-    let openingIndex = fragContent.lastIndexOf('[[', caretPos)
-    let closingIndex = fragContent.indexOf(']]', caretPos)
-    fragContent = fragContent.substring(0, openingIndex + 2) + node + fragContent.substring(closingIndex)
-    linkSearch = false
-    await tick()
-    setCaretPos(fragContent.length)
+    if (linkSearch) {
+      let openingIndex = fragContent.lastIndexOf('[[', caretPos)
+      let closingIndex = fragContent.indexOf(']]', caretPos)
+      fragments[key].content = fragContent.substring(0, openingIndex + 2) + node + fragContent.substring(closingIndex)
+      linkSearch = false
+      fragments = fragments
+      await tick()
+      setCaretPos(openingIndex + 2 + node.length + 2)
+    } else {
+      let tagIndex = fragContent.lastIndexOf('#', caretPos)
+      fragments[key].content = fragContent.substring(0, tagIndex + 1) + node + fragContent.substring(tagIndex + node.length, fragContent.length)
+      console.log(fragContent)
+      tagSearch = ""
+      fragments = fragments
+      await tick()
+      setCaretPos(tagIndex + node.length + 1)
+    }
   }
 
 </script>
@@ -375,7 +413,7 @@
     >
       {@html fragContent}
     </div>
-    {#if linkSearch}
+    {#if linkSearch || tagSearch !== ""}
       <ul id="searchLinkResults">
         {#each searchResults as node, i}
           <li
