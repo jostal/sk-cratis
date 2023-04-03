@@ -24,6 +24,7 @@
     createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', searchResults[activeNode]);
     $editor.activeNode = node 
     $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + node + '.md'
+    $editor.isJournal = false
     searchResults = []
     searchVal = ""
   }
