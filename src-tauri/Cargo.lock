@@ -2458,6 +2458,7 @@ version = "0.0.0"
 dependencies = [
  "comrak",
  "directories",
+ "lazy_static",
  "regex",
  "serde",
  "serde_json",

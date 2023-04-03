@@ -37,24 +37,27 @@
       el.addEventListener('click', handleOpenNode)
     })
     document.getElementsByClassName("active")[0]?.focus()
-    let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position
-    if (fragments[key].content.substring(caretPos - 3, caretPos - 1) === "[[") {
+    if (isInLink() && active) {
       linkSearch = true 
+      handleSearchNodes()
+    } else {
+      linkSearch = false
     }
 
-    if (extractTag(fragments[key].content)) {
+    if (extractTag(fragments[key].content) && active) {
       tagSearch = extractTag(fragments[key].content)
       handleSearchTags()
     } else {
       tagSearch = ""
     }
-    
-    if (linkSearch)
-      handleSearchNodes()
+
   }
 
   let extractTag = (str) => {
-    let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position
+    let activeEl = document.getElementsByClassName('active')[0]
+    let caretPos = 0
+    if (activeEl)
+      caretPos = getCaretPos(activeEl).position
     let lastTagIndex = str.lastIndexOf('#', caretPos - 1)
     if (lastTagIndex === -1) return null
     let nextWhitespaceIndex = str.indexOf(' ', lastTagIndex)
@@ -110,7 +113,37 @@
   $: fragments, getFragContent()
   $: fragments, saveNode(fragments, $editor.nodePath)
 
+  let isInLink = () => {
+    let activeEl = document.getElementsByClassName('active')[0]
+    let caretPos = { position: 0 }
+    if (activeEl)
+      caretPos = getCaretPos(activeEl)
+    let linkReg = /\[\[(.*?)\]\]/g 
+    let match
+    while ((match = linkReg.exec(fragments[key].content)) !== null) {
+      let linkStart = match.index
+      let linkEnd = linkStart + match[0].length
+      if (linkStart <= caretPos.position && linkEnd >= caretPos.position) return true 
+    }
+    return false
+  }
+
   let handleKeydown = async (e) => {
+    if (extractTag(fragments[key].content)) {
+      tagSearch = extractTag(fragments[key].content)
+      console.log(tagSearch)
+      handleSearchTags()
+    } else {
+      tagSearch = ""
+    }
+
+    if (isInLink()) {
+      linkSearch = true 
+      handleSearchNodes()
+    } else {
+      linkSearch = false 
+    }
+
     if (actionKeys.includes(e.key))
       e.preventDefault()
     
@@ -245,17 +278,30 @@
   }
 
   let getCaretPos = (el) => {
-    let pos = 0
-    let sel = window.getSelection()
-    let range = window.getSelection().getRangeAt(0)
-    let preCaretRange = range.cloneRange()
-    preCaretRange.selectNodeContents(el)
-    preCaretRange.setEnd(range.endContainer, range.endOffset)
-    pos = preCaretRange.toString().length 
-   
+    let position = 0
+    let length = 0
+    if (window.getSelection) {
+      let selection = window.getSelection()
+      if (selection.rangeCount > 0) {
+        let range = selection.getRangeAt(0)
+        let preCaretRange = range.cloneRange()
+        preCaretRange.selectNodeContents(el)
+        preCaretRange.setEnd(range.endContainer, range.endOffset)
+        position = preCaretRange.toString().length
+        length = range.toString().length
+      }
+    } else if (document.selection && document.selection.type !== 'Control') {
+      let textRange = document.selection.createRange()
+      let preCaretTextRange = document.body.createTextRange()
+      preCaretTextRange.moveToElementText(el)
+      preCaretTextRange.setEndPoint('EndToEnd', textRange)
+      position = preCaretTextRange.text.length - textRange.text.length
+      length = textRange.text.length 
+    }
+
     return {
-      position: pos,
-      length: range.endContainer.textContent.length
+      position: position,
+      length: length
     }
   }
 
@@ -295,7 +341,6 @@
 
   let handleDragStart = (e) => {
     // save source element 
-    dragSrcEl = e.target
     e.dataTransfer.setData('text/plain', e.target.getAttribute('key'))
     dragging = true
   }
@@ -372,7 +417,6 @@
     } else {
       let tagIndex = fragContent.lastIndexOf('#', caretPos)
       fragments[key].content = fragContent.substring(0, tagIndex + 1) + node + fragContent.substring(tagIndex + node.length, fragContent.length)
-      console.log(fragContent)
       tagSearch = ""
       fragments = fragments
       await tick()
@@ -420,7 +464,7 @@
             key={node}
             on:click={(e) => handleAutoComplete(e.target.attribute[0].nodeValue)}
             on:keydown|preventDefault
-            class={activeNode === i ? 'active' : ''}
+            class={activeNode === i ? 'activeNode' : ''}
             on:mouseover={() => activeNode = i}
           >
             {node}
@@ -461,7 +505,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
 
-      .active {
+      .activeNode {
         background-color: var(--nav-color)
       }
     }

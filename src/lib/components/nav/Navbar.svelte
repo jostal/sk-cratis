@@ -22,12 +22,18 @@
     grid-template-areas: 
       "left search right";
     width: 100%;
+    position: relative;
+    z-index: 10;
 
     #search-wrapper {
+      position: absolute;
       grid-area: search;
       display: flex;
       align-items: center;
       justify-content: center;
+      justify-self: center;
+      align-self: center;
+      width: 100%;
     }
 
     #left-nav {
@@ -39,7 +45,7 @@
 
     #right-nav {
       grid-area: right;
-      dislay: flex;
+      display: flex;
       justify-content: center;
       align-items: center;
     }

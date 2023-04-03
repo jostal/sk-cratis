@@ -5,6 +5,7 @@ async function convertMarkdown(content) {
 }
 
 async function parseContent(line) {
+  console.log(line)
   let splitArr = line.split('-')
   let level = 0
   if (splitArr.length > 1) {
