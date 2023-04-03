@@ -8,10 +8,11 @@ use std::{fs::{File, self, OpenOptions}, path::Path, env::current_dir, io::{Erro
 use comrak::{markdown_to_html, ComrakOptions};
 use directories::ProjectDirs;
 use regex::{Regex, Captures};
+use serde::{Deserialize, Serialize};
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node, search_nodes])
+        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node, search_nodes, get_journal_entries])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -83,4 +84,32 @@ fn search_nodes(searchVal: String, cratisDir: String) -> Vec<String> {
         }
     }
     nodes
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct JournalEntry {
+    date: String,
+    content: String 
+}
+
+#[tauri::command]
+fn get_journal_entries(journalDir: String) -> Vec<JournalEntry> {
+    let mut entries: Vec<JournalEntry> = Vec::new();
+    let journal_path = fs::read_dir(journalDir.clone()).unwrap();
+
+    for path in journal_path {
+        let mut entry_file = path.unwrap().file_name().to_str().unwrap().to_string();
+        let mut entry_path = journalDir.clone();
+        entry_path.push_str("/");
+        entry_path.push_str(&format!("{}", entry_file));
+        let entry_content = open_node(entry_path);
+        entry_file.truncate(entry_file.len() - 3);
+        let entry = JournalEntry {
+            date: entry_file,
+            content: entry_content 
+        };
+        entries.push(entry);
+    }
+
+    entries 
 }

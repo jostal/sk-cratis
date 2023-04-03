@@ -3,7 +3,7 @@
   import { editor } from "../../stores/EditorStore";
   import { user } from "../../stores/UserStore";
   import { searchNodes } from "../../utils/utils.editor.js";
-  import { convertMarkdown, saveNode } from '../../utils/utils.editor.js'
+  import { convertMarkdown } from '../../utils/utils.editor.js'
   import { tick } from 'svelte'
   export let key
   export let level
@@ -11,6 +11,7 @@
   export let active
   export let fragments
   export let dragging
+  export let saveNode
   let hoverHandle
   let linkSearch = false
   let searchResults = []
@@ -32,7 +33,7 @@
 
   let getFragContent = async() => {
     fragContent = active ? content : await convertMarkdown(content)
-    let links = document.getElementsByClassName('nodeLink')
+    let links = document.querySelectorAll('.nodeLink')
     Array.from(links).forEach((el) => {
       el.addEventListener('click', handleOpenNode)
     })
@@ -72,8 +73,13 @@
 
   let handleOpenNode = (e) => {
     createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', e.target.attributes[0].nodeValue)
-    $editor.activeNode = e.target.attributes[0].nodeValue
-    $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + e.target.attributes[0].nodeValue + '.md'
+    fragments = []
+    $editor = { 
+      ...$editor, 
+      activeNode: e.target.attributes[0].nodeValue, 
+      nodePath: $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + e.target.attributes[0].nodeValue + '.md', 
+      isJournal: false 
+    }
   }
 
   let handleSearchTags = async () => { 
@@ -111,7 +117,7 @@
   }
 
   $: fragments, getFragContent()
-  $: fragments, saveNode(fragments, $editor.nodePath)
+  $: fragments, saveNode(fragments)
 
   let isInLink = () => {
     let activeEl = document.getElementsByClassName('active')[0]
@@ -288,7 +294,7 @@
         preCaretRange.selectNodeContents(el)
         preCaretRange.setEnd(range.endContainer, range.endOffset)
         position = preCaretRange.toString().length
-        length = range.toString().length
+        length = range.endContainer.textContent.length
       }
     } else if (document.selection && document.selection.type !== 'Control') {
       let textRange = document.selection.createRange()
@@ -326,6 +332,7 @@
   }
 
   let handleClick = async (type, e) => {
+    console.log("CLICING")
     if (type === "focus") {
       fragments[key].active = true
       fragments = fragments

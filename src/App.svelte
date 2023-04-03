@@ -4,7 +4,7 @@
   import { documentDir } from '@tauri-apps/api/path';
   import { createNetwork } from './lib/utils/utils.network.js';
   import Sidebar from './lib/components/sidebar/Sidebar.svelte';
-    import Editor from './lib/components/editor/Editor.svelte';
+  import Editor from './lib/components/editor/Editor.svelte';
   import Navbar from './lib/components/nav/Navbar.svelte';
 
   let requestNetworkLocation = $user.config.network_config.location === "";

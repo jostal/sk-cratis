@@ -4,13 +4,15 @@ import { invoke } from '@tauri-apps/api/tauri';
 const editor = writable({
   activeNode: "",
   activeFragment: 0,
-  nodePath: ""
+  nodePath: "",
+  isJournal: true,
 });
 
 let openNode = async (nodePath, nodeName) => {
   let nodeStr;
   if (nodeName !== "") {
     nodeStr = await invoke('open_node', { nodePath })  
+    console.log(nodeStr)
   }
   return {
     content: nodeStr
