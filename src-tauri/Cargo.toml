@@ -20,6 +20,7 @@ directories = "4.0.1"
 toml = "0.5.9"
 comrak = "0.15"
 regex = "1"
+lazy_static = "1.4.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

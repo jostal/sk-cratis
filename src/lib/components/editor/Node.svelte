@@ -20,7 +20,6 @@
         content: parsedContent.content,
         active: false
       }
-      console.log(fragments)
       fragments = fragments
     }
   }

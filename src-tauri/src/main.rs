@@ -1,6 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#[macro_use]
+extern crate lazy_static;
+
 use std::{fs::{File, self, OpenOptions}, path::Path, env::current_dir, io::{ErrorKind, Write}};
 use comrak::{markdown_to_html, ComrakOptions};
 use directories::ProjectDirs;
@@ -49,12 +52,9 @@ fn parse_md(content: String) -> String {
     opts.extension.tasklist = true;
     opts.parse.smart = true;
     let mut parsed_md = markdown_to_html(&content, &opts);
-    let re = Regex::new(r"\[\[(.+?)\]\]").unwrap();
-    let res = re.replace_all(&parsed_md, |captures: &Captures| {
-        let link = captures.get(1).unwrap().as_str();
-        format!("<button key=\"{}\" class=\"nodeLink\">{}</button>", link, link)
-    });
-    res.to_string() 
+    let re = Regex::new(r#"(#|(\[\[))(?P<content>[^\s\]]+)(\]\])?"#).unwrap();
+    let result = re.replace_all(&parsed_md, r#"<button key="$3" class='nodeLink'>$0</button>"#);
+    result.to_string() 
 } 
 
 #[tauri::command]

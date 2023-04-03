@@ -66,14 +66,19 @@
     grid-template-areas: 
       "nav nav"
       "sidebar editor";
-    grid-template-columns: minmax(100px, 250px) calc(100% - 250px);
+    grid-template-columns: minmax(100px, 230px) calc(100% - 230px);
+    grid-template-rows: var(--nav-height) calc(100% - var(--nav-height));
 
     #nav {
       grid-area: nav;
+      position: relative;
+      z-index: 10;
       width: 100%;
     }
 
     #sidebar-container {
+      position: relative;
+      z-index: 5;
       grid-area: sidebar;
     }
 

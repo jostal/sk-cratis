@@ -15,6 +15,7 @@
   let linkSearch = false
   let searchResults = []
   let activeNode = 0
+  let tagSearch
 
   let fragContent
   let actionKeys = [
@@ -36,21 +37,49 @@
       el.addEventListener('click', handleOpenNode)
     })
     document.getElementsByClassName("active")[0]?.focus()
-    let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position
-    if (fragments[key].content.substring(caretPos - 3, caretPos - 1) === "[[") {
+    if (isInLink() && active) {
       linkSearch = true 
+      handleSearchNodes()
     } else {
-      // linkSearch = false
+      linkSearch = false
     }
 
-    if (linkSearch)
-      handleSearchNodes()
+    if (extractTag(fragments[key].content) && active) {
+      tagSearch = extractTag(fragments[key].content)
+      handleSearchTags()
+    } else {
+      tagSearch = ""
+    }
+
+  }
+
+  let extractTag = (str) => {
+    let activeEl = document.getElementsByClassName('active')[0]
+    let caretPos = 0
+    if (activeEl)
+      caretPos = getCaretPos(activeEl).position
+    let lastTagIndex = str.lastIndexOf('#', caretPos - 1)
+    if (lastTagIndex === -1) return null
+    let nextWhitespaceIndex = str.indexOf(' ', lastTagIndex)
+    if (nextWhitespaceIndex === -1) {
+      let tag = str.slice(lastTagIndex + 1)
+      return tag.includes('#') ? null : tag
+    }
+    if (nextWhitespaceIndex < caretPos) return null
+    let tag = str.slice(lastTagIndex + 1, nextWhitespaceIndex)
+    return tag.includes('#') ? null : tag
   }
 
   let handleOpenNode = (e) => {
     createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', e.target.attributes[0].nodeValue)
     $editor.activeNode = e.target.attributes[0].nodeValue
     $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + e.target.attributes[0].nodeValue + '.md'
+  }
+
+  let handleSearchTags = async () => { 
+    searchResults = await searchNodes(tagSearch, $user.config.network_config.location + '/' + $user.config.network_config.name)
+    if (searchResults[0] !== tagSearch)
+      searchResults.splice(0, 0, tagSearch)
   }
   
   let getSearchVal = (caretPos, content) => {
@@ -84,7 +113,37 @@
   $: fragments, getFragContent()
   $: fragments, saveNode(fragments, $editor.nodePath)
 
+  let isInLink = () => {
+    let activeEl = document.getElementsByClassName('active')[0]
+    let caretPos = { position: 0 }
+    if (activeEl)
+      caretPos = getCaretPos(activeEl)
+    let linkReg = /\[\[(.*?)\]\]/g 
+    let match
+    while ((match = linkReg.exec(fragments[key].content)) !== null) {
+      let linkStart = match.index
+      let linkEnd = linkStart + match[0].length
+      if (linkStart <= caretPos.position && linkEnd >= caretPos.position) return true 
+    }
+    return false
+  }
+
   let handleKeydown = async (e) => {
+    if (extractTag(fragments[key].content)) {
+      tagSearch = extractTag(fragments[key].content)
+      console.log(tagSearch)
+      handleSearchTags()
+    } else {
+      tagSearch = ""
+    }
+
+    if (isInLink()) {
+      linkSearch = true 
+      handleSearchNodes()
+    } else {
+      linkSearch = false 
+    }
+
     if (actionKeys.includes(e.key))
       e.preventDefault()
     
@@ -93,7 +152,7 @@
       handlePairing(e.key, e)
     }
     // handle action keys 
-    if (e.key === "Enter" && !e.shiftKey && !linkSearch) {
+    if (e.key === "Enter" && !e.shiftKey && !linkSearch && tagSearch === "") {
       e.preventDefault()
       let caretInfo = getCaretPos(document.getElementsByClassName('active')[0])
       if (caretInfo.position === caretInfo.length && caretInfo.length > 0) {
@@ -157,17 +216,18 @@
       }
       fragments = fragments
       await tick()
-      setCaretPos(prevContent.length + 1)
+      if (content === "" || caretPos.position === 0)
+        setCaretPos(prevContent.length + 1)
     }
 
-    if (e.key === "ArrowUp" && !linkSearch) {
+    if (e.key === "ArrowUp" && (!linkSearch && tagSearch === "")) {
       fragments[key-1].active = true
       fragments[key].active = false
       fragments = fragments 
       await tick()
       setCaretPos(fragments[key-1].content.length)
     }
-    if (e.key === "ArrowDown" && !linkSearch) {
+    if (e.key === "ArrowDown" && (!linkSearch && tagSearch === "")) {
       fragments[key+1].active = true
       fragments[key].active = false
       fragments = fragments
@@ -175,17 +235,17 @@
       setCaretPos(fragments[key+1].content.length)
     }
 
-    if (e.key === "Enter" && linkSearch) {
+    if (e.key === "Enter" && (linkSearch || tagSearch !== "")) {
       e.preventDefault()
       handleAutoComplete(searchResults[activeNode])
     }
 
-    if (e.key === "ArrowUp" && linkSearch) {
+    if (e.key === "ArrowUp" && (linkSearch || tagSearch !== "")) {
       if (activeNode > 0)
         activeNode--
     }
 
-    if (e.key === "ArrowDown" && linkSearch) {
+    if (e.key === "ArrowDown" && (linkSearch || tagSearch !== "")) {
       if (activeNode < searchResults.length - 1)
         activeNode++
     }
@@ -218,17 +278,30 @@
   }
 
   let getCaretPos = (el) => {
-    let pos = 0
-    let sel = window.getSelection()
-    let range = window.getSelection().getRangeAt(0)
-    let preCaretRange = range.cloneRange()
-    preCaretRange.selectNodeContents(el)
-    preCaretRange.setEnd(range.endContainer, range.endOffset)
-    pos = preCaretRange.toString().length 
-   
+    let position = 0
+    let length = 0
+    if (window.getSelection) {
+      let selection = window.getSelection()
+      if (selection.rangeCount > 0) {
+        let range = selection.getRangeAt(0)
+        let preCaretRange = range.cloneRange()
+        preCaretRange.selectNodeContents(el)
+        preCaretRange.setEnd(range.endContainer, range.endOffset)
+        position = preCaretRange.toString().length
+        length = range.toString().length
+      }
+    } else if (document.selection && document.selection.type !== 'Control') {
+      let textRange = document.selection.createRange()
+      let preCaretTextRange = document.body.createTextRange()
+      preCaretTextRange.moveToElementText(el)
+      preCaretTextRange.setEndPoint('EndToEnd', textRange)
+      position = preCaretTextRange.text.length - textRange.text.length
+      length = textRange.text.length 
+    }
+
     return {
-      position: pos,
-      length: range.endContainer.textContent.length
+      position: position,
+      length: length
     }
   }
 
@@ -268,7 +341,6 @@
 
   let handleDragStart = (e) => {
     // save source element 
-    dragSrcEl = e.target
     e.dataTransfer.setData('text/plain', e.target.getAttribute('key'))
     dragging = true
   }
@@ -334,12 +406,22 @@
   
   let handleAutoComplete = async (node) => {
     let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position 
-    let openingIndex = fragContent.lastIndexOf('[[', caretPos)
-    let closingIndex = fragContent.indexOf(']]', caretPos)
-    fragContent = fragContent.substring(0, openingIndex + 2) + node + fragContent.substring(closingIndex)
-    linkSearch = false
-    await tick()
-    setCaretPos(fragContent.length)
+    if (linkSearch) {
+      let openingIndex = fragContent.lastIndexOf('[[', caretPos)
+      let closingIndex = fragContent.indexOf(']]', caretPos)
+      fragments[key].content = fragContent.substring(0, openingIndex + 2) + node + fragContent.substring(closingIndex)
+      linkSearch = false
+      fragments = fragments
+      await tick()
+      setCaretPos(openingIndex + 2 + node.length + 2)
+    } else {
+      let tagIndex = fragContent.lastIndexOf('#', caretPos)
+      fragments[key].content = fragContent.substring(0, tagIndex + 1) + node + fragContent.substring(tagIndex + node.length, fragContent.length)
+      tagSearch = ""
+      fragments = fragments
+      await tick()
+      setCaretPos(tagIndex + node.length + 1)
+    }
   }
 
 </script>
@@ -375,14 +457,14 @@
     >
       {@html fragContent}
     </div>
-    {#if linkSearch}
+    {#if linkSearch || tagSearch !== ""}
       <ul id="searchLinkResults">
         {#each searchResults as node, i}
           <li
             key={node}
             on:click={(e) => handleAutoComplete(e.target.attribute[0].nodeValue)}
             on:keydown|preventDefault
-            class={activeNode === i ? 'active' : ''}
+            class={activeNode === i ? 'activeNode' : ''}
             on:mouseover={() => activeNode = i}
           >
             {node}
@@ -423,7 +505,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
 
-      .active {
+      .activeNode {
         background-color: var(--nav-color)
       }
     }

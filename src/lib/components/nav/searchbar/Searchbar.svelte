@@ -76,7 +76,6 @@
 
 <style lang="scss">
   #search {
-    position: relative;
     width: 100%;
 
     input {
@@ -86,6 +85,7 @@
 
     #search-results {
       margin: 0;
+      padding: 0.3em;
       width: 100%;
       position: absolute;
       z-index: 10;
