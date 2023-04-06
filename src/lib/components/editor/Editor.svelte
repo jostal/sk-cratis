@@ -16,6 +16,7 @@
 
   let getContent = async () => {
     lines = []
+    console.log($editor.nodePath)
     content = await openNode($editor.nodePath, $editor.activeNode).then(res => res.content)
     if (content) {
       lines = content.split(/\r?\n/).filter(l => l !== "")
