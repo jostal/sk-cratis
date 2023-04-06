@@ -73,7 +73,6 @@
 
   let handleOpenNode = (e) => {
     createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', e.target.attributes[0].nodeValue)
-    fragments = []
     $editor = { 
       ...$editor, 
       activeNode: e.target.attributes[0].nodeValue, 
