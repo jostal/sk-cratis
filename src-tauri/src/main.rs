@@ -111,5 +111,7 @@ fn get_journal_entries(journalDir: String) -> Vec<JournalEntry> {
         entries.push(entry);
     }
 
+    entries.sort_by(|a, b| a.date.cmp(&b.date));
+
     entries 
 }

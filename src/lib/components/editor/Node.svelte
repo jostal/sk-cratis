@@ -8,7 +8,9 @@
   let fragments = []
   let dragging = false
   export let nodeName
-  let nodePath = $editor.isJournal ? $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/' + nodeName + '.md' : $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + nodeName + '.md'
+  let nodePath = $editor.isJournal ? $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/' + nodeName + '.md' : $editor.nodePath
+
+  $: $editor, nodePath = $editor.isJournal ? $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/' + nodeName + '.md' : $editor.nodePath
   $: lines, lineToFragment()
 
   let lineToFragment = async () => {
@@ -40,7 +42,7 @@
           active={fragment.active}
           bind:fragments={fragments}
           bind:dragging={dragging}
-          saveNode={(fragments) => saveNode(fragments, nodePath)}
+          saveNode={(fragments) => {saveNode(fragments, nodePath)}}
         />
       </div>
     {/each}
