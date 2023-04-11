@@ -1,6 +1,7 @@
 <script>
   import { editor } from '../../stores/EditorStore.js'
   import { user } from '../../stores/UserStore.js'
+  import { indexNodes } from '../../utils/utils.database.js'
 
   let handleShowJournal = () => {
     $editor = {
@@ -24,6 +25,7 @@
 
 <section id="sidebar">
   <button on:click={handleShowJournal}>Journal</button>
+  <button on:click={() => indexNodes($user.config.network_config.location + "/" + $user.config.network_config.name + "/nodes/")}>Re-index</button>
 </section>
 
 <style lang="scss">

@@ -331,7 +331,6 @@
   }
 
   let handleClick = async (type, e) => {
-    console.log("CLICING")
     if (type === "focus") {
       fragments[key].active = true
       fragments = fragments
