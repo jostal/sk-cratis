@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api'
+import { updateReferences } from './utils.database.js'
 
 async function convertMarkdown(content) {
   return await invoke('parse_md', { content })
@@ -28,6 +29,7 @@ async function saveNode(fragments, nodePath) {
   })
   
   await invoke('save_node', { nodeStr, nodePath })
+  updateReferences(nodePath)
 }
 
 async function searchNodes(searchVal, cratisDir) {
