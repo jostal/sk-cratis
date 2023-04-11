@@ -30,4 +30,10 @@ async function updateReferences(nodePath) {
   await invoke('update_references', { databaseDir, nodePath })
 }
 
-export { createDatabase, indexNodes, addNode, updateReferences }
+async function getNodeReferred(nodeName) {
+  let databaseDir = await configDir()
+  databaseDir += "/Cratis/database.db"
+  return await invoke('get_node_referred', { databaseDir, nodeName })
+}
+
+export { createDatabase, indexNodes, addNode, updateReferences, getNodeReferred }

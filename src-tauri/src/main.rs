@@ -14,7 +14,7 @@ mod database;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node, search_nodes, get_journal_entries, database::create_database, database::index_nodes, database::add_node, database::update_references])
+        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node, search_nodes, get_journal_entries, database::create_database, database::index_nodes, database::add_node, database::update_references, database::get_node_referred])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

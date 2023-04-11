@@ -12,7 +12,6 @@ let openNode = async (nodePath, nodeName) => {
   let nodeStr;
   if (nodeName !== "") {
     nodeStr = await invoke('open_node', { nodePath })  
-    console.log(nodeStr)
   }
   return {
     content: nodeStr

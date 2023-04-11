@@ -3,8 +3,10 @@
   import Fragment from "./Fragment.svelte";
   import { editor } from "../../stores/EditorStore";
   import { user } from "../../stores/UserStore"
+  import { getNodeReferred } from "../../utils/utils.database.js"
   import { parseContent, saveNode } from "../../utils/utils.editor.js"
   export let lines
+  let references
   let fragments = []
   let dragging = false
   export let nodeName
@@ -27,6 +29,12 @@
       fragments = fragments
     }
   }
+
+  let getReferences = async () => {
+    references = await getNodeReferred(nodeName)
+  }
+
+  $: $editor, getReferences()
 
 </script>
 

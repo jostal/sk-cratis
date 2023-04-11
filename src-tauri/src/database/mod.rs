@@ -146,3 +146,26 @@ pub fn update_references(databaseDir: String, nodePath: String) {
         }
     }
 }
+
+// returns a vector of strings representing the names of nodes that refer to the given node
+#[tauri::command]
+pub fn get_node_referred(databaseDir: String, nodeName: String) -> Vec<String> {
+    let conn = Connection::open(&databaseDir).expect("Could not open db");
+    let mut refs: Vec<String> = Vec::new();
+
+    let mut stmt = conn.prepare("SELECT source_node, target_node FROM links WHERE target_node = ?1").unwrap();
+    let ref_iter = stmt.query_map([&nodeName], |row| {
+        Ok(Link {
+            source_node: row.get(0).unwrap(),
+            target_node: row.get(1).unwrap()
+        })
+    }).expect("Could not execute statement");
+
+    for link in ref_iter {
+        refs.push(link.unwrap().source_node);    
+    }
+
+    refs
+}
+
+
