@@ -153,7 +153,7 @@ pub fn get_node_referred(databaseDir: String, nodeName: String) -> Vec<String> {
     let conn = Connection::open(&databaseDir).expect("Could not open db");
     let mut refs: Vec<String> = Vec::new();
 
-    let mut stmt = conn.prepare("SELECT source_node, target_node FROM links WHERE target_node = ?1").unwrap();
+    let mut stmt = conn.prepare("SELECT DISTINCT source_node, target_node FROM links WHERE target_node = ?1").unwrap();
     let ref_iter = stmt.query_map([&nodeName], |row| {
         Ok(Link {
             source_node: row.get(0).unwrap(),
@@ -168,4 +168,16 @@ pub fn get_node_referred(databaseDir: String, nodeName: String) -> Vec<String> {
     refs
 }
 
-
+#[tauri::command]
+pub fn get_source_content(sourceNode: String, cratisDir: String) -> String {
+    let mut node_path = cratisDir.clone();
+    node_path.push_str(&format!("/nodes/{}.md", &sourceNode));
+    let in_nodes = Path::new(&node_path).exists();
+    if in_nodes {
+        fs::read_to_string(node_path).expect("Could not read node")
+    } else {
+        let mut journal_path = cratisDir.clone();
+        journal_path.push_str(&format!("/journal/{}.md", &sourceNode));
+        fs::read_to_string(journal_path).expect("Could not read journal")
+    }
+}

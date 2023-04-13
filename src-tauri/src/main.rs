@@ -14,7 +14,7 @@ mod database;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node, search_nodes, get_journal_entries, database::create_database, database::index_nodes, database::add_node, database::update_references, database::get_node_referred])
+        .invoke_handler(tauri::generate_handler![create_network, create_node, open_node, parse_md, save_node, search_nodes, get_journal_entries, database::create_database, database::index_nodes, database::add_node, database::update_references, database::get_node_referred, database::get_source_content])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -54,10 +54,13 @@ fn parse_md(content: String) -> String {
     opts.extension.table = true;
     opts.extension.tasklist = true;
     opts.parse.smart = true;
-    let mut parsed_md = markdown_to_html(&content, &opts);
-    let re = Regex::new(r#"(#|(\[\[))(?P<content>[^\s\]]+)(\]\])?"#).unwrap();
-    let result = re.replace_all(&parsed_md, r#"<button key="$3" class='nodeLink'>$0</button>"#);
-    result.to_string() 
+    let parsed_md = markdown_to_html(&content, &opts);
+    let btn_html = "<button key=\"$1\" class=\"nodeLink\">$0</button>";
+    let link_re = Regex::new(r"\[\[(.+?)\]\]").unwrap();
+    let result = link_re.replace_all(&parsed_md, btn_html);
+    let tag_re = Regex::new(r"(?:^|\s)#(\w+)\b").unwrap();
+    let result2 = tag_re.replace_all(&result, btn_html);
+    result2.to_string() 
 } 
 
 #[tauri::command]

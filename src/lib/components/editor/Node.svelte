@@ -5,8 +5,9 @@
   import { user } from "../../stores/UserStore"
   import { getNodeReferred } from "../../utils/utils.database.js"
   import { parseContent, saveNode } from "../../utils/utils.editor.js"
+    import Reference from "./Reference.svelte";
   export let lines
-  let references
+  let references = []
   let fragments = []
   let dragging = false
   export let nodeName
@@ -55,6 +56,17 @@
       </div>
     {/each}
   {/if}
+  {#if references.length > 0}
+    <h1>References</h1>
+  {/if}
+  {#each references as ref}
+    <div key={ref}>
+      <Reference 
+        sourceNode={ref}
+        targetNode={nodeName}
+      />
+    </div>
+  {/each}
 </section>
 
 <style lang="scss">

@@ -36,4 +36,8 @@ async function getNodeReferred(nodeName) {
   return await invoke('get_node_referred', { databaseDir, nodeName })
 }
 
-export { createDatabase, indexNodes, addNode, updateReferences, getNodeReferred }
+async function getSourceContent(sourceNode, cratisDir) {
+  return await invoke('get_source_content', { sourceNode, cratisDir })
+}
+
+export { createDatabase, indexNodes, addNode, updateReferences, getNodeReferred, getSourceContent }
