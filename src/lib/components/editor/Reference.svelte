@@ -6,6 +6,7 @@
   export let sourceNode
   export let targetNode
   let refFragments = []
+  let filteredFrags = []
 
   let getRefFragments = async () => {
     let sourceContent = await getSourceContent(sourceNode, $user.config.network_config.location + "/" + $user.config.network_config.name)
@@ -25,8 +26,7 @@
     console.log(refFragments)
 
     // remove non-referencing fragments
-    let filteredFrags = filterFragments(refFragments)   
-    console.log(filteredFrags)
+    filteredFrags = filterFragments(refFragments)   
   }
 
   let filterFragments = (fragments) => {
@@ -68,7 +68,40 @@
 
 <div id="refSource">
   <button class="sourceNode">{sourceNode}</button> 
-  {#each refFragments as frag}
-    <div></div> 
+  {#each filteredFrags as frag}
+    <div
+      class="fragContainer"
+      style={`margin-left:calc(1em*${frag.level})`}
+    >
+      <div class="handle">•</div>
+      <div class="content">{@html frag.content}</div>
+    </div> 
   {/each}
 </div>
+
+<style lang="scss">
+  #refSource {
+    .sourceNode {
+
+    }
+
+    .fragContainer {
+      display: inline-grid;
+      grid-template-areas: "handle content";
+      grid-template-columns: 1em auto;
+      width: 100%;
+
+      .handle {
+        grid-area: handle;
+        align-self: center;
+        padding: 0.1em;
+        margin-right: 0.5em;
+      }
+
+      .content {
+        grid-area: content;
+        display: inline;
+      }
+    }
+  }
+</style>
