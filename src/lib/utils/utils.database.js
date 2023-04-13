@@ -18,4 +18,26 @@ async function indexNodes(nodesDir) {
   await invoke('index_nodes', { databaseDir, nodesDir })
 }
 
-export { createDatabase, indexNodes }
+async function addNode(nodeName) {
+  let databaseDir = await configDir()
+  databaseDir += "/Cratis/database.db"
+  await invoke('add_node', { databaseDir, nodeName })
+}
+
+async function updateReferences(nodePath) {
+  let databaseDir = await configDir()
+  databaseDir += "/Cratis/database.db"
+  await invoke('update_references', { databaseDir, nodePath })
+}
+
+async function getNodeReferred(nodeName) {
+  let databaseDir = await configDir()
+  databaseDir += "/Cratis/database.db"
+  return await invoke('get_node_referred', { databaseDir, nodeName })
+}
+
+async function getSourceContent(sourceNode, cratisDir) {
+  return await invoke('get_source_content', { sourceNode, cratisDir })
+}
+
+export { createDatabase, indexNodes, addNode, updateReferences, getNodeReferred, getSourceContent }
