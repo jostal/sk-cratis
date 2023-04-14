@@ -341,11 +341,21 @@
   let handleInput = async (e) => {
     if (document.getElementsByClassName('active')[0]) {
       let caretPos = getCaretPos(document.getElementsByClassName('active')[0])
-      fragments[key].content = e.target.textContent 
+      fragments[key].content = cleanString(e.target.textContent)
       fragments = fragments
       await tick()
       setCaretPos(caretPos.position)
     }
+  }
+
+  let cleanString = (string) => {
+    let output = ""
+    for (let i=0; i<string.length; i++) {
+      if (string.charCodeAt(i) <= 127 || string.charCodeAt(i >= 160) && input.charCodeAt(i) <= 255) {
+        output += string.charAt(i)
+      }
+    }
+    return output
   }
 
   let handleClick = async (type, e) => {
