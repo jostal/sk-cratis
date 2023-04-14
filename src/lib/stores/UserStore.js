@@ -19,12 +19,14 @@ let getConfig = async () => {
 }
 
 let updateConfig = async (userConfig) => {
-  console.log(userConfig)
-  await writeTextFile('config/config.toml', json2toml(userConfig), { dir: BaseDirectory.AppConfig })
+  if (userConfig)
+    await writeTextFile('config/config.toml', json2toml(userConfig), { dir: BaseDirectory.AppConfig })
 }
 
+
+
 const user = writable({
-  config: await getConfig(),
+  config: null,
 });
 
-export { user, updateConfig }
+export { user, updateConfig, getConfig }
