@@ -474,8 +474,7 @@
     measureSpan.textContent = content
     document.body.appendChild(measureSpan)
     caretOffset = measureSpan.getBoundingClientRect().width
-    let removeSpan = document.getElementById("measureSpan")
-    removeSpan.remove()
+    measureSpan.remove()
   }
 
 </script>
