@@ -144,7 +144,6 @@
   let handleKeydown = async (e) => {
     if (extractTag(fragments[key].content)) {
       tagSearch = extractTag(fragments[key].content)
-      console.log(tagSearch)
       handleSearchTags()
     } else {
       tagSearch = ""
@@ -157,7 +156,7 @@
       linkSearch = false 
     }
 
-    if (actionKeys.includes(e.key))
+    if (actionKeys.includes(e.code))
       e.preventDefault()
     
     if (pairKeys.find(p => p.key === e.key)) {
@@ -219,6 +218,7 @@
         }
       } 
       else if (caretPos.position === 0) {
+        e.preventDefault()
         fragments[key-1].content += ' ' + fragments[key].content 
         fragments.splice(key, 1)
         let i = key
@@ -229,8 +229,12 @@
       }
       fragments = fragments
       await tick()
-      if (content === "" || caretPos.position === 0)
+     
+      if (content === "") {
+        setCaretPos(prevContent.length)
+      } else if (caretPos.position === 0) {
         setCaretPos(prevContent.length + 1)
+      }
     }
 
     if (e.key === "ArrowUp" && (!linkSearch && tagSearch === "")) {
@@ -263,15 +267,21 @@
         activeNode++
     }
 
-    if (e.key === "Tab") {
+    if (e.code === "Tab") {
+      let caretPos = getCaretPos(document.getElementsByClassName('active')[0])
+
       if (!e.shiftKey) {
         if (fragments[key - 1].level >= fragments[key].level)
           fragments[key].level++
       } else {
-        if (level > 0)
+        if (fragments[key].level > 0) {
+          fragments[key].active = true
           fragments[key].level--
+        }
       }
       fragments = fragments
+      await tick()
+      setCaretPos(caretPos.position)
     }
   }
 
@@ -462,6 +472,7 @@
     >•</div>
     <div
       class={`content ${active ? 'active' : ''}`}
+      style={`width:calc(100% - 1em * ${level})`}
       on:click={(e) => handleClick("focus", e)}
       on:blur={(e) => handleClick("blur", e)}
       on:input={handleInput}

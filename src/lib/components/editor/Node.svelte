@@ -78,6 +78,7 @@
     div {
       pointer-events: none;
       margin-bottom: 0.5em;
+      width: 100%;
     }
 
     #references {
