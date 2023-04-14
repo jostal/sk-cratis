@@ -2,6 +2,7 @@
   import { createNode } from "../../utils/utils.network";
   import { editor } from "../../stores/EditorStore";
   import { user } from "../../stores/UserStore";
+  import { isDateFormat } from '../../utils/utils.editor.js'
   import { searchNodes } from "../../utils/utils.editor.js";
   import { convertMarkdown } from '../../utils/utils.editor.js'
   import { tick } from 'svelte'
@@ -72,12 +73,19 @@
   }
 
   let handleOpenNode = (e) => {
-    createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', e.target.attributes[0].nodeValue)
+    let path
+    if (isDateFormat(e.target.attributes[0].nodeValue)) {
+      path = $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/'
+    } else {
+      path = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/'
+    }
+    createNode(path, e.target.attributes[0].nodeValue)
     $editor = { 
       ...$editor, 
       activeNode: e.target.attributes[0].nodeValue, 
-      nodePath: $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + e.target.attributes[0].nodeValue + '.md', 
-      isJournal: false 
+      nodePath: path + e.target.attributes[0].nodeValue + '.md', 
+      isJournal: isDateFormat(e.target.attributes[0].nodeValue),
+      showJournal: false
     }
   }
 
@@ -511,7 +519,7 @@
       transform: translate(-50%, -50%);
 
       .activeNode {
-        background-color: var(--nav-color)
+        background-color: var(--select-color);
       }
     }
   }

@@ -55,6 +55,7 @@
 <section id="search">
   <input 
     value={searchVal}
+    placeholder="Search or create a node"
     on:input={(e) => searchVal = e.target.value}
     on:keydown={(e) => handleKeyPress(e)}
     on:blur={() => isOpening ? null : handleFocusOut()}
@@ -81,7 +82,14 @@
 
     input {
       width: 100%;
-      padding: 0.3em;
+      padding: 0.6em;
+      border: 0.1em solid black;
+      border-radius: 0.5em;
+      box-shadow: inset 3px 3px 3px 0px rgba(0, 0, 0, 0.2);
+      background: url("search.svg") no-repeat 0.5em 50%;
+      background-size: 2em;
+      padding-left: 3em;
+      font-size: 0.8em;
     }
 
     #search-results {
@@ -98,7 +106,7 @@
       }
 
       .active {
-        background-color: #575B4F;
+        background-color: var(--select-bg);
       }
     }
   }

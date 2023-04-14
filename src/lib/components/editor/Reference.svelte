@@ -1,6 +1,7 @@
 <script>
   import { getSourceContent } from '../../utils/utils.database.js' 
-  import { parseContent } from '../../utils/utils.editor.js';
+  import { parseContent, isDateFormat } from '../../utils/utils.editor.js';
+  import { createNode } from '../../utils/utils.network.js'
   import { user } from '../../stores/UserStore.js';
   import { editor } from '../../stores/EditorStore.js';
   export let sourceNode
@@ -18,12 +19,11 @@
       refFragments[i] = {
         key: i,
         level: parsedContent.level,
-        content: parsedContent.content,
+        content: parsedContent.html,
         active: false 
       }
       refFragments = refFragments
     }
-    console.log(refFragments)
 
     // remove non-referencing fragments
     filteredFrags = filterFragments(refFragments)   
@@ -62,16 +62,47 @@
     return filteredFrags
   }
 
+  let addEvents = () => {
+    let links = document.querySelectorAll('.nodeLink')
+    Array.from(links).forEach((el) => {
+      el.addEventListener('click', handleOpenNode)
+    })
+  }
+
+  let handleOpenNode = (e) => {
+    if (isDateFormat(e.target.attributes[0].nodeValue)) {
+      createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/', e.target.attributes[0].nodeValue)
+    } else {
+      createNode($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/', e.target.attributes[0].nodeValue)
+    }
+
+    let nodePath 
+    if (isDateFormat(e.target.attributes[0].nodeValue)) {
+      nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/' + e.target.attributes[0].nodeValue + '.md'
+    } else {
+      nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + e.target.attributes[0].nodeValue + '.md'
+    }
+
+    $editor = {
+      ...$editor,
+      activeNode: e.target.attributes[0].nodeValue,
+      nodePath: nodePath,
+      isJournal: isDateFormat(e.target.attributes[0].nodeValue),
+      showJournal: false
+    }
+  }
+
+  $: $editor, addEvents()
   $: $editor, getRefFragments() 
   
 </script>
 
 <div id="refSource">
-  <button class="sourceNode">{sourceNode}</button> 
+  <button key={sourceNode} class="nodeLink">{sourceNode}</button> 
   {#each filteredFrags as frag}
     <div
       class="fragContainer"
-      style={`margin-left:calc(1em*${frag.level})`}
+      style={`margin-left:calc(1em + 1em*${frag.level})`}
     >
       <div class="handle">•</div>
       <div class="content">{@html frag.content}</div>
@@ -81,15 +112,14 @@
 
 <style lang="scss">
   #refSource {
-    .sourceNode {
-
-    }
+    pointer-events: auto;
 
     .fragContainer {
       display: inline-grid;
       grid-template-areas: "handle content";
       grid-template-columns: 1em auto;
       width: 100%;
+      margin-top: 0.5em;
 
       .handle {
         grid-area: handle;
@@ -101,6 +131,7 @@
       .content {
         grid-area: content;
         display: inline;
+        pointer-events: auto;
       }
     }
   }
