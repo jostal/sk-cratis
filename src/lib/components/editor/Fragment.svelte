@@ -18,6 +18,7 @@
   let searchResults = []
   let activeNode = 0
   let tagSearch
+  let caretOffset
 
   let fragContent
   let actionKeys = [
@@ -39,7 +40,9 @@
       el.addEventListener('click', handleOpenNode)
     })
     document.getElementsByClassName("active")[0]?.focus()
+
     if (isInLink() && active) {
+      getCaretOffset()
       linkSearch = true 
       handleSearchNodes()
     } else {
@@ -47,6 +50,7 @@
     }
 
     if (extractTag(fragments[key].content) && active) {
+      getCaretOffset()
       tagSearch = extractTag(fragments[key].content)
       handleSearchTags()
     } else {
@@ -118,13 +122,15 @@
 
   let handlePairing = async (keyPress, e) => {
     let caretPos = getCaretPos(document.getElementsByClassName('active')[0])
-    fragments[key].content = fragContent.substring(0, caretPos.position) + keyPress + pairKeys.find(p => p.key === keyPress).pair + fragContent.substring(caretPos.position)
+    fragments[key].content = fragContent.substring(0, caretPos.position) + pairKeys.find(p => p.key === keyPress).pair + fragContent.substring(caretPos.position)
+    console.log(fragments[key].content)
+    fragments = fragments
     await tick()
-    setCaretPos(caretPos.position + 1)
+    setCaretPos(caretPos.position)
   }
 
   $: fragments, getFragContent()
-  $: fragments, saveNode(fragments)
+  // $: fragments, saveNode(fragments)
 
   let isInLink = () => {
     let activeEl = document.getElementsByClassName('active')[0]
@@ -159,10 +165,6 @@
     if (actionKeys.includes(e.code))
       e.preventDefault()
     
-    if (pairKeys.find(p => p.key === e.key)) {
-      e.preventDefault()
-      handlePairing(e.key, e)
-    }
     // handle action keys 
     if (e.key === "Enter" && !e.shiftKey && !linkSearch && tagSearch === "") {
       e.preventDefault()
@@ -257,6 +259,7 @@
       handleAutoComplete(searchResults[activeNode])
     }
 
+    console.log(activeNode)
     if (e.key === "ArrowUp" && (linkSearch || tagSearch !== "")) {
       if (activeNode > 0)
         activeNode--
@@ -345,6 +348,10 @@
       fragments = fragments
       await tick()
       setCaretPos(caretPos.position)
+      saveNode(fragments)
+    }
+    if (pairKeys.find(p => p.key === e.data)) {
+      handlePairing(e.data, e)
     }
   }
 
@@ -435,6 +442,7 @@
       }
     }
     fragments = fragments
+    saveNode(fragments)
   }
   
   let handleAutoComplete = async (node) => {
@@ -454,7 +462,20 @@
       fragments = fragments
       await tick()
       setCaretPos(tagIndex + node.length + 1)
+      saveNode(fragments)
     }
+  }
+
+  let getCaretOffset = () => {
+    let caretPos = getCaretPos(document.getElementsByClassName('active')[0]).position
+    let measureSpan = document.createElement("span")
+    measureSpan.setAttribute("id", "measureSpan")
+    let content = fragContent?.substring(0, caretPos)
+    measureSpan.textContent = content
+    document.body.appendChild(measureSpan)
+    caretOffset = measureSpan.getBoundingClientRect().width
+    let removeSpan = document.getElementById("measureSpan")
+    removeSpan.remove()
   }
 
 </script>
@@ -492,7 +513,7 @@
       {@html fragContent}
     </div>
     {#if linkSearch || tagSearch !== ""}
-      <ul id="searchLinkResults">
+      <ul id="searchLinkResults" style={`left:${caretOffset}px`}>
         {#each searchResults as node, i}
           <li
             key={node}
@@ -515,6 +536,7 @@
   .frag-drag {
     pointer-events: none;
     display: inline-grid;
+    position: relative;
     grid-template-areas: "handle content";
     grid-template-columns: 1em auto;
     width: 100%;
@@ -534,13 +556,14 @@
     }
 
     #searchLinkResults {
+      list-style-type: none;
+      padding: 0.5em;
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 1em;
+      background-color: var(--select-bg);
 
       .activeNode {
-        background-color: var(--select-color);
+        background-color: var(--bg-color);
       }
     }
   }

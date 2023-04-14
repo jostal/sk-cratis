@@ -1,5 +1,5 @@
 <script>
-  import { user, updateConfig } from './lib/stores/UserStore.js';
+  import { user, updateConfig, getConfig } from './lib/stores/UserStore.js';
   import { open } from '@tauri-apps/api/dialog';
   import { documentDir } from '@tauri-apps/api/path';
   import { createNetwork } from './lib/utils/utils.network.js';
@@ -8,8 +8,16 @@
   import Editor from './lib/components/editor/Editor.svelte';
   import Navbar from './lib/components/nav/Navbar.svelte';
 
-  let requestNetworkLocation = $user.config.network_config.location === "";
+  let requestNetworkLocation
   let dir;
+
+  let initUser = async () => {
+    $user.config = await getConfig()      
+    requestNetworkLocation = $user.config.network_config.location === "";
+    return "ok"
+  }
+
+  let userInit = initUser()
 
   createDatabase()
 
@@ -36,27 +44,29 @@
 </script>
 
 <main>
-  {#if requestNetworkLocation}
-    <div id="reqNetworkContainer">
-      <h1>Create or select an existing network</h1>
-      <button on:click={() => handleNetworkSelection()}>Select Network Location</button>
-      <p>Location: {dir ? dir : "Must select network location"}</p>
-      <form on:submit|preventDefault={(e) => handleCreateNetwork(e.target)}>
-        <label for="networkName">Network Name</label>
-        <input name="networkName" required />
-        <button type="submit">Create Network</button>
-      </form>       
-    </div>
-  {:else}
-    <div id="ui-shell">
-      <div id="nav">
-        <Navbar />
+  {#await userInit then ok} 
+    {#if requestNetworkLocation}
+      <div id="reqNetworkContainer">
+        <h1>Create or select an existing network</h1>
+        <button on:click={() => handleNetworkSelection()}>Select Network Location</button>
+        <p>Location: {dir ? dir : "Must select network location"}</p>
+        <form on:submit|preventDefault={(e) => handleCreateNetwork(e.target)}>
+          <label for="networkName">Network Name</label>
+          <input name="networkName" required />
+          <button type="submit">Create Network</button>
+        </form>       
       </div>
-      <div id="editor-container">
-        <Editor />
+    {:else}
+      <div id="ui-shell">
+        <div id="nav">
+          <Navbar />
+        </div>
+        <div id="editor-container">
+          <Editor />
+        </div>
       </div>
-    </div>
-  {/if}
+    {/if}
+  {/await}
 </main>
 
 <style lang="scss">
