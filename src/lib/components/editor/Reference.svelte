@@ -10,6 +10,7 @@
   let filteredFrags = []
 
   let getRefFragments = async () => {
+    console.log(sourceNode)
     let sourceContent = await getSourceContent(sourceNode, $user.config.network_config.location + "/" + $user.config.network_config.name)
     let lines = sourceContent.split(/\r?\n/).filter(l => l !== "")
     refFragments = new Array(lines.length)
@@ -49,9 +50,9 @@
           let match
           if (linkMatch) match = linkMatch
           if (tagMatch) match = tagMatch
-          console.log(match)
           if (match[0] === targetNode) {
             filteredFrags.push(frag)
+            refLevel = frag.level
             refKey = frag.key
           }
         }
@@ -92,9 +93,8 @@
     }
   }
 
-  $: $editor, addEvents()
   $: $editor, getRefFragments() 
-  
+  $: $editor, addEvents()
 </script>
 
 <div id="refSource">

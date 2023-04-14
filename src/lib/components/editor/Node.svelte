@@ -32,6 +32,7 @@
   }
 
   let getReferences = async () => {
+    references = []
     references = await getNodeReferred(nodeName)
   }
 
