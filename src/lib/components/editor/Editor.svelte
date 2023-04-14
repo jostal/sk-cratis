@@ -72,7 +72,7 @@
 </script>
 
 <section id="editor">
-  {#if $editor.isJournal}
+  {#if $editor.showJournal}
     {#each journal as entry}
       <Node bind:lines={entry.content} nodeName={entry.date} />
     {/each}

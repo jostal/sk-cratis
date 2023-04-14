@@ -8,7 +8,8 @@
       activeNode: getDate(),
       nodePath: $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/' + getDate() + '.md', 
       activeFragment: 0,
-      isJournal: true
+      isJournal: true,
+      showJournal: true
     }
   }
 
