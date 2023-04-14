@@ -143,7 +143,7 @@ pub fn update_references(databaseDir: String, nodePath: String) {
     // conn.trace(Some(|sql| {
     //     debug!("Executing SQL statement: {}", sql);
     // }));
-
+    
     let mut file = fs::File::open(&nodePath).expect("Could not open file");
     let mut node_content = String::new();
     file.read_to_string(&mut node_content).unwrap();
