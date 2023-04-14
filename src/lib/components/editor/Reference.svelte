@@ -10,7 +10,6 @@
   let filteredFrags = []
 
   let getRefFragments = async () => {
-    console.log(sourceNode)
     let sourceContent = await getSourceContent(sourceNode, $user.config.network_config.location + "/" + $user.config.network_config.name)
     let lines = sourceContent.split(/\r?\n/).filter(l => l !== "")
     refFragments = new Array(lines.length)
