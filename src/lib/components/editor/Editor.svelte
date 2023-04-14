@@ -10,7 +10,7 @@
   let journal = []
 
   let checkIsJournal = () => {
-    if ($editor.isJournal)
+    if ($editor.showJournal)
       openJournal()
   }
 
@@ -43,6 +43,7 @@
     $editor.activeNode = currentDate
     $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/' + currentDate + '.md'
     $editor.isJournal = true
+    $editor.showJournal = true
 
     renderJournal()
   }
@@ -83,8 +84,12 @@
 <style lang="scss">
   #editor { 
     padding: 1em;
-    background-color: var(--sidebar-color);
-    margin: 20px 10% 20px 10%;
+    background-color: var(--bg-color);
+    margin-top: 10px;
+    margin-bottom: 10px;
     height: calc(100% - 5em);
+    max-width: 33%;
+    width: 33%;
+    min-width: 300px;
   }
 </style>

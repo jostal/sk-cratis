@@ -52,9 +52,6 @@
       <div id="nav">
         <Navbar />
       </div>
-      <div id="sidebar-container">
-        <Sidebar />
-      </div>
       <div id="editor-container">
         <Editor />
       </div>
@@ -68,7 +65,7 @@
     display: grid;
     grid-template-areas: 
       "nav nav"
-      "sidebar editor";
+      "editor editor";
     grid-template-columns: minmax(100px, 230px) calc(100% - 230px);
     grid-template-rows: var(--nav-height) calc(100% - var(--nav-height));
 
@@ -88,7 +85,8 @@
     #editor-container {
       grid-area: editor;
       width: 100%;
-      justify-self: start;
+      display: flex;
+      justify-content: center;
     }
   }
 </style>

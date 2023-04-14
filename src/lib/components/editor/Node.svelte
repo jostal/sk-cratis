@@ -5,7 +5,7 @@
   import { user } from "../../stores/UserStore"
   import { getNodeReferred } from "../../utils/utils.database.js"
   import { parseContent, saveNode } from "../../utils/utils.editor.js"
-    import Reference from "./Reference.svelte";
+  import Reference from "./Reference.svelte";
   export let lines
   let references = []
   let fragments = []
@@ -56,23 +56,42 @@
       </div>
     {/each}
   {/if}
-  {#if references.length > 0}
-    <h1>References</h1>
-  {/if}
-  {#each references as ref}
-    <div key={ref}>
-      <Reference 
-        sourceNode={ref}
-        targetNode={nodeName}
-      />
-    </div>
-  {/each}
+  <section id="references">
+    {#if references.length > 0}
+      <strong>References</strong>
+    {/if}
+    {#each references as ref}
+      <div key={ref}>
+        <Reference 
+          sourceNode={ref}
+          targetNode={nodeName}
+        />
+      </div>
+    {/each}
+
+  </section>
 </section>
 
 <style lang="scss">
   #node {
     div {
       pointer-events: none;
+      margin-bottom: 0.5em;
     }
+
+    #references {
+      margin-top: 2em;
+
+      strong {
+        font-size: 1.2em;
+      }
+
+      div {
+        background-color: var(--secondary-bg);
+        border-radius: 0.5em;
+        margin-top: 1em;
+        padding: 0.8em;
+      }
+    } 
   }
 </style>

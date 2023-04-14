@@ -3,7 +3,24 @@ use std::{fs, io::Read, path::Path};
 use rusqlite::{Connection, Result, Batch};
 use regex::Regex;
 use log::{debug, LevelFilter};
-use env_logger::Builder;
+use env_logger::{Env, Builder};
+use std::sync::Mutex;
+use lazy_static::lazy_static;
+use std::io::Write;
+
+lazy_static! {
+    static ref LOGGER: Mutex<Option<Builder>> = Mutex::new(None);
+}
+
+fn init_logger() {
+    let mut builder = Builder::from_env(Env::default().default_filter_or("debug"));
+    builder.format(|buf, record| {
+        writeln!(buf, "{} [{}] - {}", record.level(), record.target(), record.args())
+    });
+
+    let _ = builder.try_init();
+    let _ = LOGGER.lock().unwrap().replace(builder);
+}
 
 #[tauri::command]
 pub fn create_database(databaseDir: String) {
@@ -36,8 +53,9 @@ struct Link {
 pub fn index_nodes(databaseDir: String, nodesDir: String) -> Result<(), String> {
     let mut conn = Connection::open(&databaseDir).expect("Could not connect to db");
 
-    let mut builder = Builder::new();
-    builder.filter(None, LevelFilter::Debug).init();
+    if LOGGER.lock().unwrap().is_none() {
+        init_logger();
+    }
 
     // enable logging
     conn.trace(Some(|sql| {
@@ -115,7 +133,16 @@ pub fn add_node(databaseDir: String, nodeName: String) {
 
 #[tauri::command]
 pub fn update_references(databaseDir: String, nodePath: String) {
-    let conn = Connection::open(&databaseDir).expect("Could not open db");
+    let mut conn = Connection::open(&databaseDir).expect("Could not open db");
+
+    // if LOGGER.lock().unwrap().is_none() {
+    //     init_logger();
+    // }
+    //
+    // // enable logging
+    // conn.trace(Some(|sql| {
+    //     debug!("Executing SQL statement: {}", sql);
+    // }));
 
     let mut file = fs::File::open(&nodePath).expect("Could not open file");
     let mut node_content = String::new();
@@ -137,8 +164,8 @@ pub fn update_references(databaseDir: String, nodePath: String) {
     conn.execute("DELETE FROM links WHERE source_node = ?1", [&node_name]).expect("Could not delete source node references from links table");
     for link in refs {
         let sql = r"
-            INSERT OR IGNORE INTO nodes (name) VALUES (?2);
-            INSERT INTO links (source_node, target_node) VALUES (?1, ?2)
+            INSERT OR IGNORE INTO nodes (name) VALUES (?2), (?1);
+            INSERT INTO links (source_node, target_node) VALUES (?1, ?2);
             ";
         let mut batch = Batch::new(&conn, sql);
         while let Some(mut stmt) = batch.next().unwrap() {

@@ -6,6 +6,7 @@ const editor = writable({
   activeFragment: 0,
   nodePath: "",
   isJournal: true,
+  showJournal: true,
 });
 
 let openNode = async (nodePath, nodeName) => {
