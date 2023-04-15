@@ -1,5 +1,6 @@
 <script>
   import { user, updateConfig, getConfig } from './lib/stores/UserStore.js';
+  import { editor } from './lib/stores/EditorStore.js'
   import { open } from '@tauri-apps/api/dialog';
   import { documentDir } from '@tauri-apps/api/path';
   import { createNetwork } from './lib/utils/utils.network.js';
@@ -7,6 +8,7 @@
   import Sidebar from './lib/components/sidebar/Sidebar.svelte';
   import Editor from './lib/components/editor/Editor.svelte';
   import Navbar from './lib/components/nav/Navbar.svelte';
+  import Graph from './lib/components/graph/Graph.svelte'
 
   let requestNetworkLocation
   let dir;
@@ -61,9 +63,15 @@
         <div id="nav">
           <Navbar />
         </div>
-        <div id="editor-container">
-          <Editor />
-        </div>
+        {#if $editor.showEditor}
+          <div id="editor-container">
+            <Editor />
+          </div>
+        {:else}
+          <div id="graph-container">
+            <Graph />
+          </div>
+        {/if}
       </div>
     {/if}
   {/await}

@@ -7,6 +7,7 @@ const editor = writable({
   nodePath: "",
   isJournal: true,
   showJournal: true,
+  showEditor: true
 });
 
 let openNode = async (nodePath, nodeName) => {

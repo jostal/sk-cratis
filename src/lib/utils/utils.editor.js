@@ -20,6 +20,7 @@ async function parseContent(line) {
 }
 
 async function saveNode(fragments, nodePath) {
+  console.log(nodePath)
   //write fragments to file with bullet at appropriate level
   let nodeStr = ""
   fragments.forEach(frag => {

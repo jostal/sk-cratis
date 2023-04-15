@@ -12,8 +12,13 @@
   "dependencies": {
     "@sveltejs/svelte-virtual-list": "^3.0.1",
     "@tauri-apps/api": "^1.2.0",
+    "graphology": "^0.25.1",
+    "graphology-layout": "^0.6.1",
+    "graphology-layout-force": "^0.2.4",
+    "graphology-layout-forceatlas2": "^0.10.1",
     "json2toml": "^4.0.1",
     "showdown": "^2.1.0",
+    "sigma": "^3.0.0-alpha3",
     "toml": "^3.0.0"
   },
   "devDependencies": {
