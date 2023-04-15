@@ -4,9 +4,11 @@ use rusqlite::{Connection, Result, Batch};
 use regex::Regex;
 use log::{debug, LevelFilter};
 use env_logger::{Env, Builder};
+use serde::Serialize;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 use std::io::Write;
+use std::fs::ReadDir;
 
 lazy_static! {
     static ref LOGGER: Mutex<Option<Builder>> = Mutex::new(None);
@@ -43,8 +45,8 @@ pub fn create_database(databaseDir: String) {
     ).expect("Could not create table links");
 }
 
-#[derive(Debug)]
-struct Link {
+#[derive(Debug, Serialize)]
+pub struct Link {
     source_node: String,
     target_node: String
 }
@@ -62,14 +64,40 @@ pub fn index_nodes(databaseDir: String, nodesDir: String) -> Result<(), String> 
         debug!("Executing SQL statement: {}", sql);
     }));
 
-    let node_paths = fs::read_dir(nodesDir).unwrap();
+    let mut nodes_dir = nodesDir.clone();
+    nodes_dir.push_str("/nodes/");
+    
+    let mut journal_dir = nodesDir.clone();
+    journal_dir.push_str("/journal/");
+
+    let node_paths = fs::read_dir(nodes_dir).unwrap();
+    let journal_paths = fs::read_dir(journal_dir).unwrap();
     // empty tables
     conn.execute_batch(
         "DELETE FROM links;
         DELETE FROM nodes;"
     ).expect("Could not delete tables");
 
-    for path_result in node_paths {
+    index_dir(node_paths, &conn);
+    index_dir(journal_paths, &conn);
+
+    let mut ref_stmt = conn.prepare("SELECT source_node, target_node FROM links").unwrap();
+    let refers = ref_stmt.query_map([], |row| {
+        Ok(Link {
+            source_node: row.get(0).unwrap(),
+            target_node: row.get(1).unwrap()
+        })
+    }).unwrap();
+
+    for refer in refers {
+        println!("REFERENCE: {:?}\n\n", refer.unwrap());
+    }
+
+    Ok(())
+}
+
+fn index_dir(paths: ReadDir, conn: &Connection) {
+    for path_result in paths {
         let path = path_result.unwrap().path();
         let mut node_name = path.file_name().unwrap().to_str().unwrap().to_string();
         node_name.truncate(node_name.len() - 3);
@@ -85,13 +113,16 @@ pub fn index_nodes(databaseDir: String, nodesDir: String) -> Result<(), String> 
         let mut node_content = String::new();
         file.read_to_string(&mut node_content).unwrap();
 
-        let re = Regex::new(r#"(#|(\[\[))(?P<content>[^\s\]]+)(\]\])?"#).unwrap();
+        let re_link = Regex::new(r"\[\[(.+?)\]\]").unwrap();
+        let re_tag = Regex::new(r"(?:^|\s)#(\w+)\b").unwrap();
         let mut refs: Vec<String> = Vec::new();
 
-        for capture in re.captures_iter(&node_content) {
-            if let Some(match_str) = capture.name("content") {
-                refs.push(match_str.as_str().to_string());
-            }
+        for link in re_link.captures_iter(&node_content) {
+            refs.push(link.get(1).unwrap().as_str().to_string());
+        }
+
+        for tag in re_tag.captures_iter(&node_content) {
+            refs.push(tag.get(1).unwrap().as_str().to_string());
         }
 
         for link in refs {
@@ -105,19 +136,6 @@ pub fn index_nodes(databaseDir: String, nodesDir: String) -> Result<(), String> 
             }
         }
     }
-    let mut ref_stmt = conn.prepare("SELECT source_node, target_node FROM links").unwrap();
-    let refers = ref_stmt.query_map([], |row| {
-        Ok(Link {
-            source_node: row.get(0).unwrap(),
-            target_node: row.get(1).unwrap()
-        })
-    }).unwrap();
-
-    for refer in refers {
-        println!("REFERENCE: {:?}\n\n", refer.unwrap());
-    }
-
-    Ok(())
 }
 
 #[tauri::command]
@@ -152,17 +170,21 @@ pub fn update_references(databaseDir: String, nodePath: String) {
     let mut node_name = node_path.file_name().unwrap().to_str().unwrap().to_string();
     node_name.truncate(node_name.len() - 3);
 
-    let re = Regex::new(r#"(#|(\[\[))(?P<content>[^\s\]]+)(\]\])?"#).unwrap();
+    let re_link = Regex::new(r"\[\[(.+?)\]\]").unwrap();
+    let re_tag = Regex::new(r"(?:^|\s)#(\w+)\b").unwrap();
     let mut refs: Vec<String> = Vec::new();
 
-    for capture in re.captures_iter(&node_content) {
-        if let Some(match_str) = capture.name("content") {
-            refs.push(match_str.as_str().to_string());
-        }
+    for link in re_link.captures_iter(&node_content) {
+        refs.push(link.get(1).unwrap().as_str().to_string());
+    }
+
+    for tag in re_tag.captures_iter(&node_content) {
+        refs.push(tag.get(1).unwrap().as_str().to_string());
     }
 
     conn.execute("DELETE FROM links WHERE source_node = ?1", [&node_name]).expect("Could not delete source node references from links table");
     for link in refs {
+        println!("SOURCE: {:?}, TARGET: {:?}", &node_name, &link);
         let sql = r"
             INSERT OR IGNORE INTO nodes (name) VALUES (?2), (?1);
             INSERT INTO links (source_node, target_node) VALUES (?1, ?2);
@@ -207,4 +229,47 @@ pub fn get_source_content(sourceNode: String, cratisDir: String) -> String {
         journal_path.push_str(&format!("/journal/{}.md", &sourceNode));
         fs::read_to_string(journal_path).expect("Could not read journal")
     }
+}
+
+struct Node {
+    name: String
+}
+
+#[tauri::command]
+pub fn get_nodes(databaseDir: String) -> Vec<String> {
+    let conn = Connection::open(&databaseDir).expect("Could not open db");
+
+    let mut stmt = conn.prepare("SELECT name FROM nodes").unwrap();
+    let node_iter = stmt.query_map([], |row| {
+        Ok(Node { name: row.get(0).unwrap() })
+    }).expect("Could not iter query");
+
+    let mut nodes: Vec<String> = Vec::new();
+
+    for node in node_iter {
+        nodes.push(node.unwrap().name.to_string());
+    }
+
+    nodes
+}
+
+#[tauri::command]
+pub fn get_references(databaseDir: String) -> Vec<Link> {
+    let conn = Connection::open(&databaseDir).expect("Could not open db");
+
+    let mut stmt = conn.prepare("SELECT DISTINCT source_node, target_node FROM links").unwrap();
+    let link_iter = stmt.query_map([], |row| {
+        Ok(Link {
+            source_node: row.get(0).unwrap(),
+            target_node: row.get(1).unwrap()
+        })
+    }).expect("Could not iter query");
+
+    let mut references: Vec<Link> = Vec::new();
+
+    for reference in link_iter {
+        references.push(reference.unwrap());
+    }
+
+    references
 }

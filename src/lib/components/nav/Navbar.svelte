@@ -10,8 +10,13 @@
       nodePath: $user.config.network_config.location + '/' + $user.config.network_config.name + '/journal/' + getDate() + '.md',
       activeFragment: 0,
       isJournal: true,
-      showJournal: true 
+      showJournal: true,
+      showEditor: true
     }
+  }
+
+  let handleShowGraph = () => {
+    $editor.showEditor = false
   }
 
   let getDate = () => {
@@ -27,7 +32,8 @@
 <nav>
   <div id="left-nav">
     <button on:click={handleShowJournal} title="Journal"><img src="calendar.svg" alt="journals"/></button>
-    <button on:click={() => indexNodes($user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/')} title="Re-index network"><img src="network.svg" alt="Re-index network" /></button>
+    <button on:click={() => indexNodes($user.config.network_config.location + '/' + $user.config.network_config.name)} title="Re-index network"><img src="database-search.svg" alt="Re-index network" /></button>
+    <button on:click={handleShowGraph} title="Show graph"><img src="network.svg" alt="graph" /></button>
   </div>
   <div id="search-wrapper">
     <Searchbar />

@@ -26,6 +26,7 @@
     $editor.nodePath = $user.config.network_config.location + '/' + $user.config.network_config.name + '/nodes/' + node + '.md'
     $editor.isJournal = false
     $editor.showJournal = false
+    $editor.showEditor = true
     searchResults = []
     searchVal = ""
   }

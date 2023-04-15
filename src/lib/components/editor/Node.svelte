@@ -3,7 +3,7 @@
   import Fragment from "./Fragment.svelte";
   import { editor } from "../../stores/EditorStore";
   import { user } from "../../stores/UserStore"
-  import { getNodeReferred } from "../../utils/utils.database.js"
+  import { getNodeReferred, updateReferences } from "../../utils/utils.database.js"
   import { parseContent, saveNode } from "../../utils/utils.editor.js"
   import Reference from "./Reference.svelte";
   export let lines
@@ -32,6 +32,7 @@
   }
 
   let getReferences = async () => {
+    updateReferences(nodePath)
     references = []
     references = await getNodeReferred(nodeName)
   }
