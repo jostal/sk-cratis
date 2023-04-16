@@ -6,7 +6,7 @@
   import forceAtlas2 from 'graphology-layout-forceatlas2'
   import ForceSupervisor from "graphology-layout-force/worker"
   import { onMount } from 'svelte';
-  import { getNodes, getReferences } from '../../utils/utils.database'
+  import { getNodes, getReferences, indexNodes } from '../../utils/utils.database'
   import { createNode } from '../../utils/utils.network';
   import { isDateFormat } from '../../utils/utils.editor';
   import { editor } from '../../stores/EditorStore';
@@ -18,6 +18,8 @@
   let endClick = null
 
   onMount(async () => {
+    // index nodes
+    indexNodes($user.config.network_config.location + '/' + $user.config.network_config.name)
     // get nodes and references
     let nodes = await getNodes()
     let references = await getReferences()
