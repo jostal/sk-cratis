@@ -38,6 +38,10 @@ Cratis automatically creates a daily note that goes into your "journal" every da
 
 View and navigate all your notes and their connections with the network view.
 
+### See all references to current note
+
+View all references to the current node. This allows you to start building a note from other notes.
+
 ### Saved Locally as .md
 
 Every file in the network is saved locally using [markdown](https://github.github.com/gfm/) format.
