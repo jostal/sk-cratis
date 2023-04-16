@@ -53,7 +53,7 @@
         <button on:click={() => handleNetworkSelection()}>Select Network Location</button>
         <p>Location: {dir ? dir : "Must select network location"}</p>
         <form on:submit|preventDefault={(e) => handleCreateNetwork(e.target)}>
-          <label for="networkName">Network Name</label>
+          <label for="networkName">Network Name: </label>
           <input name="networkName" required />
           <button type="submit">Create Network</button>
         </form>       
@@ -78,6 +78,12 @@
 </main>
 
 <style lang="scss">
+  #reqNetworkContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   #ui-shell {
     position: relative;
     display: grid;

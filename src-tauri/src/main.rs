@@ -29,9 +29,9 @@ fn create_network(location: String, name: String) {
     journal_dir.push_str("/journal");
 
     // create network directories
-    fs::create_dir(cratis_dir).expect("Could not create network directory");
-    fs::create_dir(nodes_dir).expect("Could not create nodes directory");
-    fs::create_dir(journal_dir).expect("Could not create journal directory");
+    fs::create_dir_all(cratis_dir).expect("Could not create network directory");
+    fs::create_dir_all(nodes_dir).expect("Could not create nodes directory");
+    fs::create_dir_all(journal_dir).expect("Could not create journal directory");
 }
 
 #[tauri::command]
