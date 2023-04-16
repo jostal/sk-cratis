@@ -88,7 +88,7 @@
       border: 0.1em solid black;
       border-radius: 0.5em;
       box-shadow: inset 3px 3px 3px 0px rgba(0, 0, 0, 0.2);
-      background: url("search.svg") no-repeat 0.5em 50%;
+      background: url("/search.svg") no-repeat 0.5em 50%;
       background-size: 2em;
       padding-left: 3em;
       font-size: 0.8em;
