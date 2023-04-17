@@ -5,6 +5,8 @@
 Cratis is a bi-directional outliner built using Tauri and SvelteKit.
 You can create notes using markdown, link to other notes, and view all your notes and their connections in a network graph.
 
+This repository is the submission for "Svelte Hack". Newer versions of Cratis can be found at ![https://github.com/cratis-app/cratis](https://github.com/cratis-app/cratis)
+
 ## Downloads
 [Linux (AppImage)](https://github.com/jostal/sk-cratis/releases/download/v0.1.0/cratis_0.1.0_amd64.AppImage)
 
