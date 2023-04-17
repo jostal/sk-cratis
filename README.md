@@ -66,3 +66,5 @@ Download the network [here](https://github.com/jostal/sk-cratis/releases/downloa
 2. Launch Cratis
 3. Select the location you unzipped the demo network to (but not the network itself "My Notes")
 4. Set the network name to "My Notes" and click the "Create Network" button
+
+![Create Network View](https://cdn.josephtalon.ca/images/Cratis/Craits_create_network.png)
