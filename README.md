@@ -10,7 +10,7 @@ You can create notes using markdown, link to other notes, and view all your note
 
 [Debian](https://github.com/jostal/sk-cratis/releases/download/v0.1.0/cratis_0.1.0_amd64.deb)
 
-[Windows](https://github.com/jostal/sk-cratis/releases/download/v0.1.0/cratis_0.1.0_x64_en-US.msi)
+[Windows](https://github.com/jostal/sk-cratis/releases/download/v0.1.0/Cratis_0.1.0_x64_en-US.msi)
 
 ## Features
 
