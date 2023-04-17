@@ -48,6 +48,10 @@ Every file in the network is saved locally using [markdown](https://github.githu
 
 ## Demo Video
 
+Found on YouTube ![here](https://www.youtube.com/watch?v=HvM7Fqb5boQ)
+
+[![Watch the demo](https://img.youtube.com/vi/HvM7Fqb5boQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=HvM7Fqb5boQ)
+
 ## Demo Network
 
 Use the demo network to see what Cratis is capable of and view a tutorial on how to use it.
