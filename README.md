@@ -1,5 +1,7 @@
 # Cratis
 
+<img src="https://cdn.josephtalon.ca/images/Cratis/icon.png" width="100px" />
+
 Cratis is a bi-directional outliner built using Tauri and SvelteKit.
 You can create notes using markdown, link to other notes, and view all your notes and their connections in a network graph.
 
