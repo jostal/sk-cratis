@@ -49,3 +49,14 @@ Every file in the network is saved locally using [markdown](https://github.githu
 ## Demo Video
 
 ## Demo Network
+
+Use the demo network to see what Cratis is capable of and view a tutorial on how to use it.
+
+Download the network [here](https://github.com/jostal/sk-cratis/releases/download/v0.1.0/demo_network.zip).
+
+### Open the network
+
+1. Unzip the folder to your desired network location
+2. Launch Cratis
+3. Select the location you unzipped the demo network to (but not the network itself "My Notes")
+4. Set the network name to "My Notes" and click the "Create Network" button
