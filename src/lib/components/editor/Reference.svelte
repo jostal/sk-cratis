@@ -101,7 +101,7 @@
   {#each filteredFrags as frag}
     <div
       class="fragContainer"
-      style={`margin-left:calc(1em + 1em*${frag.level})`}
+      style={`margin-left:calc(1em + 1em*${frag.level});width:calc(100% - 1em*${frag.level} - 1em)`}
     >
       <div class="handle">•</div>
       <div class="content">{@html frag.content}</div>
@@ -112,12 +112,12 @@
 <style lang="scss">
   #refSource {
     pointer-events: auto;
+    width: 100%;
 
     .fragContainer {
       display: inline-grid;
       grid-template-areas: "handle content";
       grid-template-columns: 1em auto;
-      width: 100%;
       margin-top: 0.5em;
 
       .handle {

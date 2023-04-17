@@ -51,7 +51,7 @@
     grid-template-areas: 
       "left search right";
     grid-template-columns: 33% 33% 33%;
-    width: 100%;
+    width: calc(100% - 2em);
     position: relative;
     padding: 1em;
     z-index: 10;

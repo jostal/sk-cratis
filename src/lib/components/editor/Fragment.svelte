@@ -35,7 +35,9 @@
 
   let getFragContent = async() => {
     fragContent = active ? content : await convertMarkdown(content)
+    await tick()
     let links = document.querySelectorAll('.nodeLink')
+    console.log(links)
     Array.from(links).forEach((el) => {
       el.addEventListener('click', handleOpenNode)
     })
